@@ -5,9 +5,7 @@ with open('README.rst') as readme_file:
 
 setup(
     name='lp',
-    description=(
-        'An aid for choosing words in Letterpress',
-    ),
+    description='An aid for choosing words in Letterpress',
     url='https://github.com/colons/lp',
     author='colons',
     author_email='pypi@colons.co',

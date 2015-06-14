@@ -28,12 +28,17 @@ if __name__ == '__main__':
     home = len(owned)
     away = len(targets + locked)
 
+    unclaimed_plural = len(unclaimed) != 1
+
     print(
-        'The current score is {home}-{away}. There are {unclaimed} tiles left.'
+        'The current score is {home}-{away}. There {are} {unclaimed} '
+        'tile{plural} left.'
         .format(
             home=home,
             away=away,
             unclaimed=len(unclaimed),
+            plural='s' if unclaimed_plural else '',
+            are='are' if unclaimed_plural else 'is',
         )
     )
 

@@ -8,20 +8,39 @@ import lp
 
 
 if __name__ == '__main__':
-    _, targets, unclaimed, unclaimable = [
-        a if a != '-' else '' for a in sys.argv
-    ]
+    try:
+        _, locked, targets, unclaimed, owned = [
+            a if a != '-' else '' for a in sys.argv
+        ]
+    except ValueError:
+        print('USAGE: lp [locked] [targets] [unclaimed] [owned]\n'
+              'see README.rst for more details.')
+        sys.exit(1)
 
+    unclaimable = locked + owned
     available = targets + unclaimed + unclaimable
+
     if len(available) != 5 * 5:
         print('You provided {} letters. That is not a letterpress grid.'
               .format(len(available)))
         sys.exit(1)
 
+    home = len(owned)
+    away = len(targets + locked)
+
+    print(
+        'The current score is {home}-{away}. There are {unclaimed} tiles left.'
+        .format(
+            home=home,
+            away=away,
+            unclaimed=len(unclaimed),
+        )
+    )
+
     playable = lp.get_playable_words(available)
 
     print('\n'.join((
-        '{:>2} - {}'.format(s, w)
+        '{:>3} - {}'.format('win' if s == float('inf') else s, w)
         for w, s in
-        lp.get_best_words(playable, targets, unclaimed)[:10]
+        lp.get_best_words(playable, targets, unclaimed, away-home)[:10]
     )))

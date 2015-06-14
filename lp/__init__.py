@@ -22,7 +22,7 @@ def get_playable_words(available):
             yield word
 
 
-def get_score(word, targets, unclaimed):
+def get_score(word, targets, unclaimed, win_at):
     target_letters = list(targets)
     unclaimed_letters = list(unclaimed)
 
@@ -36,11 +36,14 @@ def get_score(word, targets, unclaimed):
             score += 1
             unclaimed_letters.remove(letter)
 
+    if len(unclaimed_letters) == 0 and score > win_at:
+        score += float('inf')
+
     return score
 
 
-def get_best_words(playable_words, targets, unclaimed):
+def get_best_words(playable_words, targets, unclaimed, win_at):
     return sorted((
-        (w, get_score(w, targets, unclaimed))
+        (w, get_score(w, targets, unclaimed, win_at))
         for w in playable_words
     ), key=lambda ws: ws[1], reverse=True)

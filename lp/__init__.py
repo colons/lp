@@ -59,3 +59,27 @@ def get_best_words(playable_words, targets, unclaimed, win_at):
         (w, get_score(w, targets, unclaimed, win_at))
         for w in playable_words
     ), key=lambda ws: ws[1], reverse=True)
+
+
+def example_grid():
+    from colors import black
+    from functools import partial
+
+    d = 'negative'
+    ed = partial(black, bg='red', style=d)
+    e = partial(black, bg='red')
+    u = partial(black, bg='white')
+    m = partial(black, bg='blue')
+    md = partial(black, bg='blue', style=d)
+
+    state = [e, u, m, m, md,
+             ed, e, e, e, m,
+             e, m, e, m, m,
+             m, m, e, e, e,
+             md, m, e, ed, ed]
+    grid = 'GQGNMSVZSNRGLRENDPDIHFARM'
+
+    return ''.join(
+        state[index](' {} '.format(letter)) + ('' if (index+1) % 5 else '\n')
+        for index, letter in enumerate(grid)
+    )

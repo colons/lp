@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+"""
+USAGE: lp DEFENDED TARGETS UNCLAIMED OWNED [COUNT]
+
+DEFENDED is the letters that the enemy holds and which can not be taken.
+TARGETS is the letters that the enemy holds but can be taken.
+UNCLAIMED is letters nobody has played yet.
+OWNED is letters you control, regardless of if they're defended or not.
+COUNT is an optional number of words to suggest. Will default to 10 if absent.
+
+The order of letters within each group is insignificant, but I find it easiest
+to read from left to right and top to bottom.
+
+If any of these groups has no letters at present, just type - in its place.
+"""
+
+from __future__ import print_function, unicode_literals
 
 import sys
 
@@ -14,15 +29,21 @@ if __name__ == '__main__':
         else:
             count = 10
 
-        _, locked, targets, unclaimed, owned = [
-            a if a != '-' else '' for a in sys.argv
+        _, defended, targets, unclaimed, owned = [
+            a.lower() if a != '-' else '' for a in sys.argv
         ]
     except ValueError:
-        print('USAGE: lp LOCKED TARGETS UNCLAIMED OWNED [COUNT]\n'
-              'see README.rst for more details.')
+        doclines = __doc__.strip().split('\n')
+        doclines.insert(
+            -1,
+            'For example, given the following game state:\n\n' +
+            lp.example_grid() +
+            '\nYou would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf\n'
+        )
+        print('\n'.join(doclines))
         sys.exit(1)
 
-    unclaimable = locked + owned
+    unclaimable = defended + owned
     available = targets + unclaimed + unclaimable
 
     if len(available) != 5 * 5:
@@ -31,7 +52,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     home = len(owned)
-    away = len(targets + locked)
+    away = len(targets + defended)
 
     unclaimed_plural = len(unclaimed) != 1
 

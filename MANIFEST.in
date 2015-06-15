@@ -1,1 +1,2 @@
 include *.rst
+words/Words/*.txt

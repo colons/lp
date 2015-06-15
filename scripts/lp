@@ -13,6 +13,10 @@ The order of letters within each group is insignificant, but I find it easiest
 to read from left to right and top to bottom.
 
 If any of these groups has no letters at present, just type - in its place.
+
+You can specify a language in your environment as LP_LANG, so for example
+you could run:
+  LP_LANG=de lp [letters]
 """
 
 from __future__ import print_function, unicode_literals
@@ -34,11 +38,10 @@ if __name__ == '__main__':
         ]
     except ValueError:
         doclines = __doc__.strip().split('\n')
-        doclines.insert(
-            -1,
-            'For example, given the following game state:\n\n' +
+        doclines.append(
+            '\nFor example, given the following game state:\n\n' +
             lp.example_grid() +
-            '\nYou would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf\n'
+            '\nYou would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf'
         )
         print('\n'.join(doclines))
         sys.exit(1)

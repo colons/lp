@@ -1,6 +1,12 @@
+import os
+
 WORDS = [
     w.rstrip('\n') for w in
-    open('/usr/share/dict/words').readlines()
+    open(os.path.join(
+        os.path.dirname(__file__), '..', 'words', 'Words', '{}.txt'.format(
+            os.environ.get('LP_LANG', 'en').lower()
+        )
+    )).readlines()
     if w.lower() == w
 ]
 

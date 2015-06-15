@@ -1,2 +1,3 @@
 include *.rst
-words/Words/*.txt
+include LICENSE
+include words/Words/*.txt

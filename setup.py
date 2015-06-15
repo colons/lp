@@ -10,13 +10,12 @@ setup(
     author='colons',
     author_email='pypi@colons.co',
     version='0.2',
-    license="BSD",
+    license='LICENSE',
     platforms=['any'],
     packages=['lp'],
     scripts=['scripts/lp'],
     long_description=README,
     classifiers=[
-        'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
     ],
     install_requires=[

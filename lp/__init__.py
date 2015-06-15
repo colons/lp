@@ -22,6 +22,18 @@ def get_playable_words(available):
             yield word
 
 
+def is_prefix_of(word, of):
+    return of.startswith(word) and len(of) > len(word)
+
+
+def get_unique_playable_words(available):
+    playable = list(get_playable_words(available))
+    return filter(
+        lambda w: not any((is_prefix_of(w, a) for a in playable)),
+        playable,
+    )
+
+
 def get_score(word, targets, unclaimed, win_at):
     target_letters = list(targets)
     unclaimed_letters = list(unclaimed)

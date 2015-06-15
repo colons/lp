@@ -1,2 +1,3 @@
-include *.rst LICENSE
-recursive-include lp *.txt
+include *.rst
+include LICENSE
+recursive-include lp/words/Words *.txt

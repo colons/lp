@@ -1,10 +1,7 @@
 from setuptools import setup
-from os import listdir, path
 
 with open('README.rst') as readme_file:
     README = readme_file.read()
-
-WORDLIST_DIR = path.join('lp', 'words', 'Words')
 
 setup(
     name='lp',
@@ -12,7 +9,7 @@ setup(
     url='https://github.com/colons/lp',
     author='colons',
     author_email='pypi@colons.co',
-    version='0.2.2',
+    version='0.2.3',
     license='LICENSE',
     platforms=['any'],
     packages=['lp'],
@@ -24,8 +21,4 @@ setup(
     install_requires=[
         'ansicolors',
     ],
-    data_files=[(WORDLIST_DIR, [
-        path.join(WORDLIST_DIR, l) for l in
-        listdir(WORDLIST_DIR)
-    ])],
 )

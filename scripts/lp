@@ -26,8 +26,6 @@ import sys
 import lp
 
 
-print(lp.__file__)
-
 if __name__ == '__main__':
     try:
         if len(sys.argv) == 6:

@@ -26,7 +26,7 @@ import sys
 import lp
 
 
-if __name__ == '__main__':
+def go():
     try:
         if len(sys.argv) == 6:
             count = int(sys.argv.pop(-1))
@@ -78,3 +78,7 @@ if __name__ == '__main__':
         for w, s in
         lp.get_best_words(playable, targets, unclaimed, away-home)[:count]
     )))
+
+
+if __name__ == '__main__':
+    go()

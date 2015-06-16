@@ -7,7 +7,6 @@ WORDS = [
             os.environ.get('LP_LANG', 'en').lower()
         )
     )).readlines()
-    if w.lower() == w
 ]
 
 
@@ -33,11 +32,20 @@ def is_prefix_of(word, of):
 
 
 def get_unique_playable_words(available):
-    playable = list(get_playable_words(available))
-    return filter(
-        lambda w: not any((is_prefix_of(w, a) for a in playable)),
-        playable,
+    playable = sorted(
+        get_playable_words(available),
+        key=lambda w: len(w),
+        reverse=True,
     )
+
+    blocked = set()
+
+    for word in playable:
+        if word not in blocked:
+            yield word
+
+        for i in range(1, len(word)):
+            blocked.add(word[:i])
 
 
 def get_score(word, targets, unclaimed, win_at):

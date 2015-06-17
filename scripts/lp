@@ -26,7 +26,16 @@ import sys
 import lp
 
 
-def go():
+def print_docs_and_exit():
+    print(
+        '{}\nFor example, given the following game state:\n\n{}\n\n'
+        'You would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf'
+        .format(__doc__, lp.example_grid())
+    )
+    sys.exit(1)
+
+
+def go_with_letters_from_argv():
     try:
         if len(sys.argv) == 6:
             count = int(sys.argv.pop(-1))
@@ -37,15 +46,12 @@ def go():
             a.lower() if a != '-' else '' for a in sys.argv
         ]
     except ValueError:
-        doclines = __doc__.strip().split('\n')
-        doclines.append(
-            '\nFor example, given the following game state:\n\n' +
-            lp.example_grid() +
-            '\nYou would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf'
-        )
-        print('\n'.join(doclines))
-        sys.exit(1)
+        print_docs_and_exit()
 
+    from_letters(defended, targets, unclaimed, owned, count)
+
+
+def from_letters(defended, targets, unclaimed, owned, count):
     unclaimable = defended + owned
     available = targets + unclaimed + unclaimable
 
@@ -80,5 +86,16 @@ def go():
     )))
 
 
+def go_with_image():
+    raise NotImplementedError()
+
+
 if __name__ == '__main__':
-    go()
+    if len(sys.argv) in [5, 6]:
+        go_with_letters_from_argv()
+
+    elif len(sys.argv) in [2, 3]:
+        go_with_image()
+
+    else:
+        print_docs_and_exit()

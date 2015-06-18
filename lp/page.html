@@ -2,29 +2,106 @@
 <html>
   <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0"/>
     <title>lp</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        border: 0;
+        border-collapse: collapse;
+      }
+
+      body {
+        background-color: #ECEBE7;
+        color: #454545;
+        margin: 0 auto;
+        max-width: 50rem;
+      }
+
+      h1 {
+        font-size: 1em;
+      }
+
+      #grid {font-size: 12.5vw}
+      @media (min-width: 50rem) {
+        #grid {font-size: 6.25rem}
+      }
+
+      #grid td {
+        color: #131E25;
+        width: 1.6em;
+        height: 1.6em;
+        text-align: center;
+      }
+
+      #grid .E {background-color: #F92A24}
+      #grid .e {background-color: #F2847B}
+      #grid .u {background-color: #E0DFDB}
+      #grid .m {background-color: #67BBF2}
+      #grid .M {background-color: #178EFE}
+      
+      #words, form {
+        margin: 1em auto;
+        padding: 0 .5em;
+        font-size: 1.2rem;
+      }
+      @media (min-width: 40rem) {
+        #words, form {font-size: 2rem}
+      }
+      #words td {padding: .2em .5em}
+      #words .score {text-align: right}
+
+      input {
+        margin: .5em 0;
+        display: block;
+        font-size: .8em;
+      }
+
+      input[type=submit] {
+        padding: .5em 1em;
+        background-color: #454545;
+        color: #ECEBE7;
+      }
+    </style>
   </head>
   <body>
     %if words:
+      <table id="grid">
+        <tr>
+          %for i, (state, letter) in enumerate(zip(*grid)):
+            <td class="{{ state }}">{{ letter }}</td>
+            %if not (i + 1) % 5 and not i == 24:
+              </tr><tr>
+            %end
+          %end
+        </tr>
+      </table>
       <table id="words">
-        %for word, score in words:
+        %for word, score in words[:50]:
           <tr>
-            <td>{{ word }}</td>
-            <td>
+            <td class="score">
               %if score == float('inf'):
                 victory
               %else:
-                {{ score }}
+                +{{ score }}
               %end
             </td>
+            <td class="word">{{ word }}</td>
           </tr>
         %end
       </table>
-    %else:
-      <form action="" method="post" enctype="multipart/form-data">
-        <input type="file" name="image"/>
-        <input type="submit" name="upload"/>
-      </form>
     %end
+
+    <form action="" method="post" enctype="multipart/form-data">
+      %if words:
+        <h1>upload another screenshot</h1>
+      %else:
+        <h1>upload a letterpress screenshot</h1>
+      %end
+
+      <input type="file" name="image"/>
+      <input type="submit" value="upload"/>
+    </form>
   </body>
 </html>

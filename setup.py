@@ -9,7 +9,7 @@ setup(
     url='https://github.com/colons/lp',
     author='colons',
     author_email='pypi@colons.co',
-    version='0.4',
+    version='0.5',
     license='LICENSE',
     platforms=['any'],
     packages=['lp'],

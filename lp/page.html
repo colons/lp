@@ -48,16 +48,21 @@
       }
 
       #grid td {
-        color: #131E25;
         width: 1.6em;
         height: 1.6em;
         text-align: center;
         font-weight: bold;
       }
 
+      #grid td span {
+        color: #111111;
+        opacity: .8;
+      }
+
       #grid .E {background-color: #F92A24}
       #grid .e {background-color: #F2847B}
       #grid .u {background-color: #E0DFDB}
+      #grid .u:nth-child(2n) {background-color: #E2E1DD}
       #grid .m {background-color: #67BBF2}
       #grid .M {background-color: #178EFE}
       
@@ -103,7 +108,7 @@
       <table id="grid">
         <tr>
           %for i, (state, letter) in enumerate(zip(*grid)):
-            <td class="{{ state }}">{{ letter }}</td>
+          <td class="{{ state }}"><span>{{ letter }}</span></td>
             %if not (i + 1) % 5 and not i == 24:
               </tr><tr>
             %end

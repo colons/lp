@@ -8,9 +8,9 @@ homebrew or whatever your favourite package manager is.
 
 ::
 
-   $ pip install lp  # you might need sudo to install things with pip
-   $ lp ummpuatlt cmsfreq zs krlbudh
-   The current score is 7-16. There are 2 tiles left.
+   $ brew install tesseract || sudo apt-get install tesseract-ocr tesseract-ocr-eng || yum or uhh yaourt or something
+   $ [sudo] pip install lp
+   $ lp IMG_0001.PNG
    win - scruzes
    win - schmalzes
    win - schmaltzes

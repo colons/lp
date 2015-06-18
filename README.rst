@@ -23,4 +23,6 @@ homebrew or whatever your favourite package manager is.
     11 - lumpsuckers
    $ lp --listen=127.0.0.1:8081
 
-Run ``lp --help`` for more information.
+Run ``lp --help`` for more information on command line invocation. If you want
+to host the web version, ``lp/server.py`` is the WSGI app you should point your
+server at.

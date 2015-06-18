@@ -99,10 +99,16 @@ def parse_image(image):
         state = colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
         states.append(state)
 
-        letter = subprocess.check_output(
-            ['tesseract', crop_path, 'stdout', '-psm', '10',
-             tess_config_file.name]
-        ).decode('utf-8').strip() or 'I'  # tesseract doesn't parse | as I
+        subprocess.check_output(
+            ['tesseract', crop_path, os.path.join(dirpath, 'letter'), '-psm',
+             '10', tess_config_file.name],
+            stderr=subprocess.STDOUT,
+        )
+
+        with open(os.path.join(dirpath, 'letter.txt')) as lfile:
+            # tesseract doesn't parse | as I, so we assume if it's blank:
+            letter = lfile.read().strip() or 'I'
+
         letters.append(letter)
 
         {'E': defended, 'e': targets, 'u': unclaimed, 'm': owned, 'M': owned,

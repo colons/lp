@@ -1,5 +1,5 @@
 import os
-from bottle import get, post, request, run, view
+from bottle import default_app, get, post, request, run, view
 
 from lp import get_best_words_for_letters
 from lp.image import parse_image
@@ -23,6 +23,9 @@ def form():
     return {'words': None}
 
 
+application = default_app()
+
+
 def serve(address):
     if ':' in address:
         host, port = address.split(':', 1)
@@ -30,5 +33,5 @@ def serve(address):
         port = address
         host = '127.0.0.1'
 
-    run(host=host, port=int(port))
+    run(app=application, host=host, port=int(port))
     print address

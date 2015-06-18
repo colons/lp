@@ -82,9 +82,9 @@ def parse_image(image):
 
     for x, y in ((x, y) for y in range(GRID_SIZE) for x in range(GRID_SIZE)):
         coords = (
-            (x * base) + base/8,
-            (y * base) + top_padding + base/8,
-            ((x + 1) * base) - base/8,
+            (x * base) + base/6,
+            (y * base) + top_padding + base/6,
+            ((x + 1) * base) - base/6,
             ((y + 1) * base) + top_padding - base/6,
         )
         crop = image.crop(coords)

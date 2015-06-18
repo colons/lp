@@ -8,11 +8,14 @@
       @import url(http://fonts.googleapis.com/css?family=Varela+Round);
 
       * {
-        padding: 0;
-        margin: 0;
-        border: 0;
         border-collapse: collapse;
         font-weight: normal;
+      }
+
+      ul, li, p, h1 {
+        border: 0;
+        padding: 0;
+        margin: 0;
       }
 
       body {
@@ -73,14 +76,13 @@
       form {max-width: 30rem}
       input {font-size: .8em}
 
-      input[type=file] {max-width: 70%}
-      input[type=submit] {
-        padding: .5em 1em;
-        background-color: #454545;
-        color: #ECEBE7;
-        max-width: 30%;
+      form p#inputs {
+        margin: 1em 0;
+        position: relative;
       }
-      form p#inputs {margin: 1em 0}
+
+      input[type=file] {max-width: 70%}
+      input[type=submit] {max-width: 30%}
 
       footer {
         text-align: center;

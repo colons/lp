@@ -47,7 +47,7 @@ def form():
 def words():
     image = request.files.get('image')
 
-    if image is None:
+    if not image:
         return form()
 
     parsed = parse_image(image)

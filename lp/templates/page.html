@@ -62,10 +62,13 @@
       #grid .E {background-color: #F92A24}
       #grid .e {background-color: #F2847B}
       #grid .u {background-color: #E0DFDB}
-      #grid .u:nth-child(2n) {background-color: #E2E1DD}
       #grid .m {background-color: #67BBF2}
       #grid .M {background-color: #178EFE}
       
+      #grid tr:nth-child(even) .u:nth-child(even),
+      #grid tr:nth-child(odd) .u:nth-child(odd)
+      {background-color: #E2E1DD}
+
       #words, form {
         margin: 1em auto;
         padding: 0 .5em;

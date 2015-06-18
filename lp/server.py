@@ -7,20 +7,25 @@ from lp.image import parse_image
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
 
 
-@post('/')
-@view(TEMPLATE_PATH)
-def result():
-    parsed = parse_image(request.files.get('image').file)
-    return {
-        'words': get_best_words_for_letters(*parsed['letters']),
-        'grid': parsed['grid'],
-    }
-
-
 @get('/')
 @view(TEMPLATE_PATH)
 def form():
     return {'words': None}
+
+
+@post('/')
+@view(TEMPLATE_PATH)
+def result():
+    image = request.files.get('image')
+
+    if image is None:
+        return form()
+
+    parsed = parse_image(image.file)
+    return {
+        'words': get_best_words_for_letters(*parsed['letters']),
+        'grid': parsed['grid'],
+    }
 
 
 application = default_app()

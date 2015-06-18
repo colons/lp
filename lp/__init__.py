@@ -78,7 +78,7 @@ def get_best_words(playable_words, targets, unclaimed, win_at):
     return sorted((
         (w, get_score(w, targets, unclaimed, win_at))
         for w in playable_words
-    ), key=lambda ws: ws[1], reverse=True)
+    ), key=lambda ws: (ws[1], -len(ws[0])), reverse=True)
 
 
 def render_grid(state, letters):

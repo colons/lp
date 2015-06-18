@@ -25,6 +25,7 @@ import sys
 
 import lp
 from lp.image import parse_image
+from lp.server import serve
 
 
 def print_docs_and_exit():
@@ -61,37 +62,12 @@ def go_with_letters_from_argv():
 
 
 def from_letters(defended, targets, unclaimed, owned, count):
-    unclaimable = defended + owned
-    available = targets + unclaimed + unclaimable
-
-    if len(available) != lp.GRID_SIZE ** 2:
-        print('You provided {} letters. That is not a letterpress grid.'
-              .format(len(available)))
-        sys.exit(1)
-
-    home = len(owned)
-    away = len(targets + defended)
-
-    unclaimed_plural = len(unclaimed) != 1
-
-    print(
-        'The current score is {home}-{away}. There {are} {unclaimed} '
-        'tile{plural} left.\n'
-        .format(
-            home=home,
-            away=away,
-            unclaimed=len(unclaimed),
-            plural='s' if unclaimed_plural else '',
-            are='are' if unclaimed_plural else 'is',
-        )
-    )
-
-    playable = lp.get_unique_playable_words(available)
-
     print('\n'.join((
         '{:>3} - {}'.format('win' if s == float('inf') else s, w)
         for w, s in
-        lp.get_best_words(playable, targets, unclaimed, away-home)[:count]
+        lp.get_best_words_for_letters(
+            defended, targets, unclaimed, owned
+        )[:count]
     )))
 
 
@@ -100,14 +76,20 @@ def go_with_image():
         count = get_count_from(sys.argv[2])
     else:
         count = 10
-    image_path = sys.argv[1]
-    defended, targets, unclaimed, owned = parse_image(image_path)
-    from_letters(defended, targets, unclaimed, owned, count)
+    image = open(sys.argv[1])
+    parsed = parse_image(image)
+    print(lp.render_grid(*parsed['grid']) + '\n')
+    defended, targets, unclaimed, owned = parsed['letters']
+    from_letters(*parsed['letters'] + (count,))
 
 
 if __name__ == '__main__':
     if '--help' in sys.argv:
         print_docs_and_exit()
+
+    elif len(sys.argv) == 2 and sys.argv[1].startswith('--listen='):
+        address = sys.argv[1].split('=', 1)[1]
+        serve(address)
 
     elif len(sys.argv) in [5, 6]:
         go_with_letters_from_argv()

@@ -50,13 +50,13 @@ def closest_colour(colour, colours):
     return min(colours, key=lambda c: colour_diff(c, colour))
 
 
-def parse_image(image_path):
+def parse_image(image):
     letters, defended, targets, unclaimed, owned, states = (
         [], [], [], [], [], [],
     )
 
     dirpath = tempfile.mkdtemp()
-    image = Image.open(image_path).convert('RGB')
+    image = Image.open(image).convert('RGB')
 
     # we can look at the top left pixel of the image to find out what our
     # unclaimed colour is, and thereby produce a shortlist of the themes that
@@ -90,7 +90,6 @@ def parse_image(image_path):
         crop = image.crop(coords)
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))
         crop.save(crop_path)
-        crop.save('{}_{}.png'.format(x, y))  # XXX
 
         state = colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
         states.append(state)
@@ -104,8 +103,9 @@ def parse_image(image_path):
         {'E': defended, 'e': targets, 'u': unclaimed, 'm': owned, 'M': owned,
          }[state].append(letter)
 
-    print(render_grid(states, letters) + '\n')
-
-    return tuple((
-        ''.join(l).lower() for l in (defended, targets, unclaimed, owned)
-    ))
+    return {
+        'grid': (states, letters),
+        'letters': tuple((
+            ''.join(l).lower() for l in (defended, targets, unclaimed, owned)
+        ))
+    }

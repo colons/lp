@@ -20,6 +20,7 @@ setup(
     ],
     install_requires=[
         'ansicolors',
+        'bottle',
         'pillow',
     ],
     include_package_data=True,

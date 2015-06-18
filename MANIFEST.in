@@ -1,3 +1,4 @@
 include *.rst
+include lp/page.html
 include LICENSE
 recursive-include lp/words/Words *.txt

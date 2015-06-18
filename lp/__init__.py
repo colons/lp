@@ -104,6 +104,24 @@ def render_grid(state, letters):
     ).strip()
 
 
+def get_best_words_for_letters(defended, targets, unclaimed, owned):
+    unclaimable = defended + owned
+    available = targets + unclaimed + unclaimable
+
+    if len(available) != GRID_SIZE ** 2:
+        raise ValueError(
+            'You provided {} letters. That is not a letterpress grid.'
+            .format(len(available))
+        )
+
+    home = len(owned)
+    away = len(targets + defended)
+
+    playable = get_unique_playable_words(available)
+
+    return get_best_words(playable, targets, unclaimed, away-home)
+
+
 def example_grid():
     return render_grid('eummMEeeemememmmmeeeMmeEE',
                        'GQGNMSVZSNRGLRENDPDIHFARM')

@@ -107,7 +107,7 @@ def parse_image(image):
 
         with open(os.path.join(dirpath, 'letter.txt')) as lfile:
             # tesseract doesn't parse | as I, so we assume if it's blank:
-            letter = lfile.read().strip() or 'I'
+            letter = lfile.read().strip().upper() or 'I'
 
         letters.append(letter)
 

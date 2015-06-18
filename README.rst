@@ -11,16 +11,16 @@ homebrew or whatever your favourite package manager is.
    $ pip install lp  # you might need sudo to install things with pip
    $ lp ummpuatlt cmsfreq zs krlbudh
    The current score is 7-16. There are 2 tiles left.
-   win - schmaltzes
-   win - schmalzes
    win - scruzes
+   win - schmalzes
+   win - schmaltzes
     12 - chamfers
-    11 - bumsuckers
-    11 - charmless
-    11 - clubmasters
-    11 - craftless
-    11 - feldschars
-    11 - lumpsuckers
+    11 - screams
+    11 - marquess
+    11 - masquers
+    11 - scammers
+    11 - scampers
+    11 - scamster
    $ lp --listen=127.0.0.1:8081
 
 Run ``lp --help`` for more information on command line invocation. If you want

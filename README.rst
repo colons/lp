@@ -1,7 +1,10 @@
 lp
 ==
 
-A script for cheating at Letterpress.
+A script and WSGI app for cheating at Letterpress. Can derive the state of a
+game and make recommendations based on screenshots uploaded to a web app.
+Letter recognition requires tesseract, which you can probably get from apt or
+homebrew or whatever your favourite package manager is.
 
 ::
 
@@ -18,5 +21,6 @@ A script for cheating at Letterpress.
     11 - craftless
     11 - feldschars
     11 - lumpsuckers
+   $ lp --listen=127.0.0.1:8081
 
 Run ``lp --help`` for more information.

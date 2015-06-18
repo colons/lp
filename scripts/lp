@@ -1,12 +1,28 @@
 #!/usr/bin/env python
 
 """
-USAGE: lp DEFENDED TARGETS UNCLAIMED OWNED [COUNT]
+Run server:
+  lp --listen=ADDRESS
+
+By image:
+  lp SCREENSHOT [COUNT]
+
+By letters:
+  lp DEFENDED TARGETS UNCLAIMED OWNED [COUNT]
+
+ADDRESS is the bind address for a server.
+
+For example, you could run:
+  lp --listen=127.0.0.1:8081
+and then visit http://127.0.0.1:8081 in your browser.
+
+SCREENSHOT is a path to a letterpress screenshot.
 
 DEFENDED is the letters that the enemy holds and which can not be taken.
 TARGETS is the letters that the enemy holds but can be taken.
 UNCLAIMED is letters nobody has played yet.
 OWNED is letters you control, regardless of if they're defended or not.
+
 COUNT is an optional number of words to suggest. Will default to 10 if absent.
 
 The order of letters within each group is insignificant, but I find it easiest
@@ -32,7 +48,7 @@ def print_docs_and_exit():
     print(
         '{}\nFor example, given the following game state:\n\n{}\n\n'
         'You would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf'
-        .format(__doc__, lp.example_grid())
+        .format(__doc__, lp.example_grid()).strip()
     )
     sys.exit(1)
 

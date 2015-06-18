@@ -1,4 +1,8 @@
+from functools import partial
 import os
+
+from colors import black
+
 
 WORDS = [
     w.rstrip('\n') for w in
@@ -8,6 +12,8 @@ WORDS = [
         )
     )).readlines()
 ]
+
+GRID_SIZE = 5
 
 
 def word_is_playable(word, available):
@@ -75,10 +81,7 @@ def get_best_words(playable_words, targets, unclaimed, win_at):
     ), key=lambda ws: ws[1], reverse=True)
 
 
-def example_grid():
-    from colors import black
-    from functools import partial
-
+def render_grid(state, letters):
     d = 'negative'
     ed = partial(black, bg='red', style=d)
     e = partial(black, bg='red')
@@ -86,14 +89,21 @@ def example_grid():
     m = partial(black, bg='blue')
     md = partial(black, bg='blue', style=d)
 
-    state = [e, u, m, m, md,
-             ed, e, e, e, m,
-             e, m, e, m, m,
-             m, m, e, e, e,
-             md, m, e, ed, ed]
-    grid = 'GQGNMSVZSNRGLRENDPDIHFARM'
+    state_funcs = [{
+        'E': ed,
+        'e': e,
+        'u': u,
+        'm': m,
+        'M': md,
+    }[s] for s in state]
 
     return ''.join(
-        state[index](' {} '.format(letter)) + ('' if (index+1) % 5 else '\n')
-        for index, letter in enumerate(grid)
-    )
+        state_funcs[index](' {} '.format(letter)) + (
+            '' if (index+1) % GRID_SIZE else '\n')
+        for index, letter in enumerate(letters)
+    ).strip()
+
+
+def example_grid():
+    return render_grid('eummMEeeemememmmmeeeMmeEE',
+                       'GQGNMSVZSNRGLRENDPDIHFARM')

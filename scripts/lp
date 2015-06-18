@@ -24,6 +24,7 @@ from __future__ import print_function, unicode_literals
 import sys
 
 import lp
+from lp.image import parse_image
 
 
 def print_docs_and_exit():
@@ -35,13 +36,21 @@ def print_docs_and_exit():
     sys.exit(1)
 
 
-def go_with_letters_from_argv():
+def get_count_from(source):
     try:
-        if len(sys.argv) == 6:
-            count = int(sys.argv.pop(-1))
-        else:
-            count = 10
+        return int(source)
+    except ValueError:
+        print('{!r} is not a number'.format(source))
+        sys.exit(1)
 
+
+def go_with_letters_from_argv():
+    if len(sys.argv) == 6:
+        count = get_count_from(sys.argv.pop(-1))
+    else:
+        count = 10
+
+    try:
         _, defended, targets, unclaimed, owned = [
             a.lower() if a != '-' else '' for a in sys.argv
         ]
@@ -55,7 +64,7 @@ def from_letters(defended, targets, unclaimed, owned, count):
     unclaimable = defended + owned
     available = targets + unclaimed + unclaimable
 
-    if len(available) != 5 * 5:
+    if len(available) != lp.GRID_SIZE ** 2:
         print('You provided {} letters. That is not a letterpress grid.'
               .format(len(available)))
         sys.exit(1)
@@ -67,7 +76,7 @@ def from_letters(defended, targets, unclaimed, owned, count):
 
     print(
         'The current score is {home}-{away}. There {are} {unclaimed} '
-        'tile{plural} left.'
+        'tile{plural} left.\n'
         .format(
             home=home,
             away=away,
@@ -87,11 +96,20 @@ def from_letters(defended, targets, unclaimed, owned, count):
 
 
 def go_with_image():
-    raise NotImplementedError()
+    if len(sys.argv) == 3:
+        count = get_count_from(sys.argv[2])
+    else:
+        count = 10
+    image_path = sys.argv[1]
+    defended, targets, unclaimed, owned = parse_image(image_path)
+    from_letters(defended, targets, unclaimed, owned, count)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) in [5, 6]:
+    if '--help' in sys.argv:
+        print_docs_and_exit()
+
+    elif len(sys.argv) in [5, 6]:
         go_with_letters_from_argv()
 
     elif len(sys.argv) in [2, 3]:

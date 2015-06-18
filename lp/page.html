@@ -24,7 +24,11 @@
       }
 
       h1 {
-        font-size: 1em;
+        font-size: 1.1em;
+      }
+
+      h1, p {
+        margin: .4em 0;
       }
 
       #grid {font-size: 12.5vw}
@@ -101,11 +105,16 @@
       %if words:
         <h1>upload another screenshot</h1>
       %else:
-        <h1>upload a letterpress screenshot</h1>
+        <h1>upload a screenshot of a letterpress game</h1>
       %end
 
       <input type="file" name="image"/>
       <input type="submit" value="upload"/>
+
+      %if not words:
+        <p>you'll get back a list of the top fifty words you could play and the score differential they'd get you</p>
+        <p>it doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble</p>
+      %end
     </form>
   </body>
 </html>

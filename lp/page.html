@@ -23,6 +23,15 @@
         font-family: "Varela Round", sans-serif;
       }
 
+      a[href] {
+        text-decoration: none;
+        color: #178EFE;
+      }
+
+      a[href]:hover {
+        color: #F92A24;
+      }
+
       h1 {
         font-size: 1.1em;
       }
@@ -71,6 +80,19 @@
         background-color: #454545;
         color: #ECEBE7;
       }
+
+      footer {
+        text-align: center;
+        font-size: 1.1rem;
+        padding: 0 .5em;
+        margin: 3em auto;
+      }
+      footer img {
+        width: 7rem;
+        margin-bottom: 1em;
+      }
+      footer ul {list-style: none}
+      footer li {display: inline-block}
     </style>
   </head>
   <body>
@@ -103,18 +125,25 @@
 
     <form action="" method="post" enctype="multipart/form-data">
       %if words:
-        <h1>upload another screenshot</h1>
+        <h1>Upload another screenshot</h1>
       %else:
-        <h1>upload a screenshot of a letterpress game</h1>
+        <h1>Upload a screenshot of a letterpress game</h1>
       %end
 
       <input type="file" name="image"/>
       <input type="submit" value="upload"/>
 
       %if not words:
-        <p>you'll get back a list of the top fifty words you could play and the score differential they'd get you</p>
-        <p>it doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble</p>
+        <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>
+        <p>It doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble.</p>
       %end
     </form>
+
+    <footer>
+      <a href="https://colons.co/"><img src="https://colons.co/stamp.png" alt="toats a colons joint"/></a>
+      <ul>
+        <li><a href="https://github.com/colons/lp">source</a></li>
+      </ul>
+    </footer>
   </body>
 </html>

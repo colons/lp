@@ -37,7 +37,7 @@
       }
 
       h1, p {
-        margin: .4em 0;
+        margin: .6em 0;
       }
 
       #grid {font-size: 12.5vw}
@@ -70,21 +70,17 @@
       #words .score {text-align: right}
       #words .word {text-transform: uppercase}
 
-      form {
-        max-width: 30rem;
-      }
+      form {max-width: 30rem}
+      input {font-size: .8em}
 
-      input {
-        margin: .5em 0;
-        display: block;
-        font-size: .8em;
-      }
-
+      input[type=file] {max-width: 70%}
       input[type=submit] {
         padding: .5em 1em;
         background-color: #454545;
         color: #ECEBE7;
+        max-width: 30%;
       }
+      form p#inputs {margin: 1em 0}
 
       footer {
         text-align: center;
@@ -135,8 +131,10 @@
         <h1>Upload a screenshot of a Letterpress game</h1>
       %end
 
-      <input type="file" name="image"/>
-      <input type="submit" value="Upload"/>
+      <p id="inputs">
+        <input type="file" name="image"/>
+        <input type="submit" value="Upload"/>
+      </p>
 
       %if not words:
         <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>

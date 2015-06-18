@@ -7,11 +7,12 @@ import subprocess
 
 from PIL import Image
 
-from lp import GRID_SIZE, render_grid
+from lp import GRID_SIZE
 
 
 # as RGB tuples of enemy defended, enemy, unclaimed, ours, defended ours (or
-# EeumM, as we refer to it internally)
+# EeumM, as we refer to it internally). we actually use the background colour
+# for unclaimed to make shortlisting our themes easier.
 THEMES = (
     # light
     ((249, 42, 36), (242, 132, 123), (236, 235, 231), (103, 187, 242),
@@ -20,7 +21,7 @@ THEMES = (
     ((249, 0, 186), (132, 0, 103), (37, 37, 37), (71, 138, 19),
      (113, 255, 10)),
     # retro
-    ((229, 74, 54), (239, 148, 114), (239, 223, 177), (181, 111, 218),
+    ((229, 74, 54), (239, 148, 114), (249, 232, 185), (181, 111, 218),
      (119, 0, 255)),
     # dark
     ((249, 42, 36), (132, 41, 37), (37, 37, 37), (23, 97, 134),
@@ -29,7 +30,7 @@ THEMES = (
     ((20, 82, 45), (104, 149, 119), (217, 225, 206), (234, 181, 89),
      (251, 138, 9)),
     # glow
-    ((226, 0, 86), (120, 7, 60), (43, 43, 43), (60, 137, 100), (86, 255, 176)),
+    ((226, 0, 86), (120, 7, 60), (37, 37, 37), (60, 137, 100), (86, 255, 176)),
     # pink
     ((68, 42, 36), (154, 120, 123), (253, 215, 232), (250, 80, 227),
      (249, 0, 221)),

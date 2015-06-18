@@ -1,9 +1,10 @@
 from __future__ import unicode_literals, print_function
 
 import os
-import tempfile
+import shutil
 from string import uppercase
 import subprocess
+import tempfile
 
 from PIL import Image, ImageOps
 
@@ -77,6 +78,9 @@ def parse_image(image):
         for i, c in enumerate(theme)
     }
 
+    tess_config_file = tempfile.NamedTemporaryFile(mode='w+')
+    tess_config_file.write('tessedit_char_whitelist {}\n'.format(uppercase))
+
     width, height = image.size
     base = width/GRID_SIZE
     top_padding = height-width
@@ -96,13 +100,15 @@ def parse_image(image):
         states.append(state)
 
         letter = subprocess.check_output(
-            ['tesseract', crop_path, 'stdout', '-psm', '10', '-c',
-             'tessedit_char_whitelist={}'.format(uppercase)]
+            ['tesseract', crop_path, 'stdout', '-psm', '10',
+             tess_config_file.name]
         ).decode('utf-8').strip() or 'I'  # tesseract doesn't parse | as I
         letters.append(letter)
 
         {'E': defended, 'e': targets, 'u': unclaimed, 'm': owned, 'M': owned,
          }[state].append(letter)
+
+    shutil.rmtree(dirpath)
 
     return {
         'grid': (states, letters),

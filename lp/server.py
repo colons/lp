@@ -10,6 +10,13 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
 
 
 app = Flask(__name__)
+app.config.update({
+    'MAX_CONTENT_LENGTH': 1024 * 512,
+    'SECRET_KEY': ''.join((
+        choice(lowercase + uppercase + digits)
+        for x in range(128)
+    )),
+})
 
 
 def form():
@@ -38,14 +45,6 @@ def result():
         context = words()
 
     return render_template('page.html', **context)
-
-
-app.config.update({
-    'csrf.secret': ''.join((
-        choice(lowercase + uppercase + digits)
-        for x in range(128)
-    )),
-})
 
 
 def serve(address):

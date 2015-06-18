@@ -19,7 +19,7 @@ def random_string():
 app = Flask(__name__)
 app.config.update({
     'MAX_CONTENT_LENGTH': 1024 * 512,
-    'SECRET_KEY': random_string(),
+    'SECRET_KEY': os.environ.get('SECRET_KEY', random_string()),
 })
 
 

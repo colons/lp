@@ -5,7 +5,7 @@ import tempfile
 from string import uppercase
 import subprocess
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from lp import GRID_SIZE
 
@@ -90,7 +90,7 @@ def parse_image(image):
         )
         crop = image.crop(coords)
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))
-        crop.save(crop_path)
+        ImageOps.posterize(crop, 2).save(crop_path)
 
         state = colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
         states.append(state)

@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1.0"/>
     <title>lp</title>
     <style>
-      @import url(http://fonts.googleapis.com/css?family=Varela+Round);
+      @import url(http://fonts.googleapis.com/css?family=Nunito);
 
       * {
         border-collapse: collapse;
         padding: 0;
         margin: 0;
+        font-weight: normal;
       }
 
       ul, li, p, h1 {
@@ -22,7 +23,7 @@
         color: #454545;
         margin: 0 auto;
         max-width: 50rem;
-        font-family: "Varela Round", sans-serif;
+        font-family: "Nunito", sans-serif;
       }
 
       a[href] {
@@ -51,7 +52,6 @@
         width: 1.6em;
         height: 1.6em;
         text-align: center;
-        font-weight: bold;
       }
 
       #grid td span {
@@ -62,10 +62,13 @@
       #grid .E {background-color: #F92A24}
       #grid .e {background-color: #F2847B}
       #grid .u {background-color: #E0DFDB}
-      #grid .u:nth-child(2n) {background-color: #E2E1DD}
       #grid .m {background-color: #67BBF2}
       #grid .M {background-color: #178EFE}
       
+      #grid tr:nth-child(even) .u:nth-child(even),
+      #grid tr:nth-child(odd) .u:nth-child(odd)
+      {background-color: #E2E1DD}
+
       #words, form {
         margin: 1em auto;
         padding: 0 .5em;
@@ -104,51 +107,53 @@
     <link rel="shortcut icon" href="https://colons.co/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body>
-    %if words:
+    {% if words %}
       <table id="grid">
         <tr>
-          %for i, (state, letter) in enumerate(zip(*grid)):
-          <td class="{{ state }}"><span>{{ letter }}</span></td>
-            %if not (i + 1) % 5 and not i == 24:
+          {% for state, letter in grid %}
+            <td class="{{ state }}"><span>{{ letter }}</span></td>
+            {% if (not loop.index % 5) and (not loop.last) %}
               </tr><tr>
-            %end
-          %end
+            {% endif %}
+          {% endfor %}
         </tr>
       </table>
       <table id="words">
-        %for word, score in words[:50]:
+        {% for word, score in words %}
           <tr>
             <td class="score">
-              %if score == float('inf'):
+              {% if score == inf %}
                 victory
-              %else:
+              {% else %}
                 +{{ score }}
-              %end
+              {% endif %}
             </td>
             <td class="word">{{ word }}</td>
           </tr>
-        %end
+        {% endfor %}
       </table>
-    %end
+    {% endif %}
 
     <form action="" method="post" enctype="multipart/form-data">
-      %if words:
+      <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
+
+      {% if words %}
         <h1>Upload another screenshot</h1>
-      %else:
+      {% else %}
         <h1>Upload a screenshot of a Letterpress game</h1>
-      %end
+      {% endif %}
 
       <p id="inputs">
         <input type="file" name="image"/>
         <input type="submit" value="Upload"/>
       </p>
 
-      %if not words:
+      {% if not words %}
         <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>
         <p>It doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble.</p>
 
         <p>If you just want to have a look at an example, you could save and upload <a href="https://colons.co/lp.png">this image</a>.</p>
-      %end
+      {% endif %}
     </form>
 
     <footer>

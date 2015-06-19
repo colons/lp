@@ -1,5 +1,7 @@
 import os
-from bottle import default_app, get, post, request, run, view
+from flask import Flask, request, render_template, session, abort
+from string import lowercase, uppercase, digits
+from random import choice
 
 from lp import get_best_words_for_letters
 from lp.image import parse_image
@@ -7,28 +9,63 @@ from lp.image import parse_image
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
 
 
-@get('/')
-@view(TEMPLATE_PATH)
+def random_string():
+    return ''.join((
+        choice(lowercase + uppercase + digits)
+        for x in range(128)
+    ))
+
+
+app = Flask(__name__)
+app.config.update({
+    'MAX_CONTENT_LENGTH': 1024 * 512,
+    'SECRET_KEY': os.environ.get('SECRET_KEY', random_string()),
+})
+
+
+@app.before_request
+def csrf_protect():
+    if request.method == "POST":
+        token = session.pop('_csrf_token', None)
+        if not token or token != request.form.get('_csrf_token'):
+            abort(403)
+
+
+def generate_csrf_token():
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = random_string()
+    return session['_csrf_token']
+
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
+
+
 def form():
     return {'words': None}
 
 
-@post('/')
-@view(TEMPLATE_PATH)
-def result():
+def words():
     image = request.files.get('image')
 
-    if image is None:
+    if not image:
         return form()
 
-    parsed = parse_image(image.file)
+    parsed = parse_image(image)
     return {
-        'words': get_best_words_for_letters(*parsed['letters']),
-        'grid': parsed['grid'],
+        'words': get_best_words_for_letters(*parsed['letters'])[:50],
+        'grid': zip(*parsed['grid']),
+        'inf': float('inf'),
     }
 
 
-application = default_app()
+@app.route('/', methods=['POST', 'GET'])
+def result():
+    if request.method == 'GET':
+        context = form()
+    else:
+        context = words()
+
+    return render_template('page.html', **context)
 
 
 def serve(address):
@@ -38,5 +75,8 @@ def serve(address):
         port = address
         host = '127.0.0.1'
 
-    run(app=application, host=host, port=int(port))
+    app.run(host=host, port=int(port), debug=True)
     print address
+
+
+application = app

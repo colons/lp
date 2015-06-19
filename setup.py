@@ -9,7 +9,7 @@ setup(
     url='https://github.com/colons/lp',
     author='colons',
     author_email='pypi@colons.co',
-    version='0.5',
+    version='0.5.2',
     license='LICENSE',
     platforms=['any'],
     packages=['lp'],
@@ -20,7 +20,7 @@ setup(
     ],
     install_requires=[
         'ansicolors',
-        'bottle',
+        'flask',
         'pillow',
     ],
     include_package_data=True,

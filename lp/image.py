@@ -78,9 +78,6 @@ def parse_image(image):
         for i, c in enumerate(theme)
     }
 
-    tess_config_file = tempfile.NamedTemporaryFile(mode='w+')
-    tess_config_file.write('tessedit_char_whitelist {}\n'.format(uppercase))
-
     width, height = image.size
     base = width/GRID_SIZE
     top_padding = height-width
@@ -101,7 +98,7 @@ def parse_image(image):
 
         subprocess.check_output(
             ['tesseract', crop_path, os.path.join(dirpath, 'letter'), '-psm',
-             '10', tess_config_file.name],
+             '10', '-c', 'tessedit_char_whitelist={}'.format(uppercase)],
             stderr=subprocess.STDOUT,
         )
 

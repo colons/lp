@@ -5,7 +5,7 @@ from colors import black
 
 
 WORDS = [
-    w.rstrip('\n') for w in
+    w.rstrip('\n').lower() for w in
     open(os.path.join(
         os.path.dirname(__file__), 'words', 'Words', '{}.txt'.format(
             os.environ.get('LP_LANG', 'en').lower()

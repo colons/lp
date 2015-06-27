@@ -8,7 +8,7 @@ homebrew or whatever your favourite package manager is.
 
 ::
 
-   $ brew install tesseract || sudo apt-get install tesseract-ocr tesseract-ocr-eng || yum or uhh yaourt or something
+   $ brew install tesseract --HEAD || sudo apt-get install tesseract-ocr tesseract-ocr-eng || yum or uhh yaourt or something
    $ [sudo] pip install lp
    $ lp IMG_0001.PNG
    win - scruzes

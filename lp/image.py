@@ -78,9 +78,6 @@ def parse_image(image):
         for i, c in enumerate(theme)
     }
 
-    tess_config_file = tempfile.NamedTemporaryFile(mode='w+')
-    tess_config_file.write('tessedit_char_whitelist {}\n'.format(uppercase))
-
     width, height = image.size
     base = width/GRID_SIZE
     top_padding = height-width
@@ -101,13 +98,13 @@ def parse_image(image):
 
         subprocess.check_output(
             ['tesseract', crop_path, os.path.join(dirpath, 'letter'), '-psm',
-             '10', tess_config_file.name],
+             '10', '-c', 'tessedit_char_whitelist={}'.format(uppercase)],
             stderr=subprocess.STDOUT,
         )
 
         with open(os.path.join(dirpath, 'letter.txt')) as lfile:
             # tesseract doesn't parse | as I, so we assume if it's blank:
-            letter = lfile.read().strip().upper() or 'I'
+            letter = lfile.read().strip() or 'I'
 
         letters.append(letter)
 

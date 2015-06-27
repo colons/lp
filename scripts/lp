@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
 """
-Run server:
-  lp --listen=ADDRESS
-
 By image:
   lp SCREENSHOT [COUNT]
 
-By letters:
-  lp DEFENDED TARGETS UNCLAIMED OWNED [COUNT]
+SCREENSHOT is a path to a Letterpress screenshot.
+
+Run server:
+  lp --listen=ADDRESS
 
 ADDRESS is the bind address for a server.
 
@@ -16,40 +15,21 @@ For example, you could run:
   lp --listen=127.0.0.1:8081
 and then visit http://127.0.0.1:8081 in your browser.
 
-SCREENSHOT is a path to a letterpress screenshot.
-
-DEFENDED is the letters that the enemy holds and which can not be taken.
-TARGETS is the letters that the enemy holds but can be taken.
-UNCLAIMED is letters nobody has played yet.
-OWNED is letters you control, regardless of if they're defended or not.
-
-COUNT is an optional number of words to suggest. Will default to 10 if absent.
-
-The order of letters within each group is insignificant, but I find it easiest
-to read from left to right and top to bottom.
-
-If any of these groups has no letters at present, just type - in its place.
-
 You can specify a language in your environment as LP_LANG, so for example
 you could run:
-  LP_LANG=de lp [letters]
+  LP_LANG=de lp [args]
 """
 
 from __future__ import print_function, unicode_literals
 
 import sys
 
-import lp
-from lp.image import parse_image
+from lp.game import Grid
 from lp.server import serve
 
 
 def print_docs_and_exit():
-    print(
-        '{}\nFor example, given the following game state:\n\n{}\n\n'
-        'You would want to enter:\n  lp srm gvzsrlpdia q gnmngrendhf'
-        .format(__doc__, lp.example_grid()).strip()
-    )
+    print(__doc__.strip())
     sys.exit(1)
 
 
@@ -61,42 +41,20 @@ def get_count_from(source):
         sys.exit(1)
 
 
-def go_with_letters_from_argv():
-    if len(sys.argv) == 6:
-        count = get_count_from(sys.argv.pop(-1))
-    else:
-        count = 10
-
-    try:
-        _, defended, targets, unclaimed, owned = [
-            a.lower() if a != '-' else '' for a in sys.argv
-        ]
-    except ValueError:
-        print_docs_and_exit()
-
-    from_letters(defended, targets, unclaimed, owned, count)
-
-
-def from_letters(defended, targets, unclaimed, owned, count):
-    print('\n'.join((
-        '{:>3} - {}'.format('win' if s == float('inf') else s, w)
-        for w, s in
-        lp.get_best_words_for_letters(
-            defended, targets, unclaimed, owned
-        )[:count]
-    )))
-
-
 def go_with_image():
     if len(sys.argv) == 3:
         count = get_count_from(sys.argv[2])
     else:
         count = 10
+
     image = open(sys.argv[1])
-    parsed = parse_image(image)
-    print(lp.render_grid(*parsed['grid']) + '\n')
-    defended, targets, unclaimed, owned = parsed['letters']
-    from_letters(*parsed['letters'] + (count,))
+    grid = Grid.from_image(image)
+
+    print(grid)
+    print('\n'.join((
+        '{:>3} - {}'.format('win' if s == float('inf') else s, w)
+        for w, s in grid.get_best_words()[:count]
+    )))
 
 
 if __name__ == '__main__':
@@ -106,9 +64,6 @@ if __name__ == '__main__':
     elif len(sys.argv) == 2 and sys.argv[1].startswith('--listen='):
         address = sys.argv[1].split('=', 1)[1]
         serve(address)
-
-    elif len(sys.argv) in [5, 6]:
-        go_with_letters_from_argv()
 
     elif len(sys.argv) in [2, 3]:
         go_with_image()

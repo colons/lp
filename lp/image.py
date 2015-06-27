@@ -8,12 +8,14 @@ import tempfile
 
 from PIL import Image, ImageOps
 
-from lp import GRID_SIZE
+from lp.game import GRID_SIZE, NOBODY, OPPONENT, PLAYER
 
 
-# as RGB tuples of enemy defended, enemy, unclaimed, ours, defended ours (or
-# EeumM, as we refer to it internally). we actually use the background colour
-# for unclaimed to make shortlisting our themes easier.
+# as RGB tuples of opponent defended, opponent, unclaimed, ours, defended ours.
+# we actually use the background colour for unclaimed to make shortlisting our
+# themes easier, as there are actually two unclaimed colours in each theme
+# (look closely :3)
+
 THEMES = (
     # light
     ((249, 42, 36), (242, 132, 123), (236, 235, 231), (103, 187, 242),
@@ -53,9 +55,8 @@ def closest_colour(colour, colours):
 
 
 def parse_image(image):
-    letters, defended, targets, unclaimed, owned, states = (
-        [], [], [], [], [], [],
-    )
+    letters = []
+    ownership = []
 
     dirpath = tempfile.mkdtemp()
     image = Image.open(image).convert('RGB')
@@ -70,7 +71,7 @@ def parse_image(image):
     unclaimed_colour = closest_colour(image.getpixel((3, 3)),
                                       unclaimed_colours)
     colours = {
-        c: 'EeumM'[i]
+        c: (OPPONENT, OPPONENT, NOBODY, PLAYER, PLAYER)[i]
         for theme in (
             t for t in THEMES
             if t[2] == unclaimed_colour
@@ -93,8 +94,9 @@ def parse_image(image):
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))
         ImageOps.posterize(crop, 2).save(crop_path)
 
-        state = colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
-        states.append(state)
+        ownership.append(
+            colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
+        )
 
         subprocess.check_output(
             ['tesseract', crop_path, os.path.join(dirpath, 'letter'), '-psm',
@@ -108,14 +110,6 @@ def parse_image(image):
 
         letters.append(letter)
 
-        {'E': defended, 'e': targets, 'u': unclaimed, 'm': owned, 'M': owned,
-         }[state].append(letter)
-
     shutil.rmtree(dirpath)
 
-    return {
-        'grid': (states, letters),
-        'letters': tuple((
-            ''.join(l).lower() for l in (defended, targets, unclaimed, owned)
-        ))
-    }
+    return (''.join(letters), ''.join(ownership))

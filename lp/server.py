@@ -1,25 +1,15 @@
 import os
 from flask import Flask, request, render_template, session, abort
-from string import lowercase, uppercase, digits
-from random import choice
 
-from lp import get_best_words_for_letters
-from lp.image import parse_image
+from lp.game import Grid
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
-
-
-def random_string():
-    return ''.join((
-        choice(lowercase + uppercase + digits)
-        for x in range(128)
-    ))
 
 
 app = Flask(__name__)
 app.config.update({
     'MAX_CONTENT_LENGTH': 1024 * 512,
-    'SECRET_KEY': os.environ.get('SECRET_KEY', random_string()),
+    'SECRET_KEY': os.environ.get('SECRET_KEY', os.urandom(128))
 })
 
 
@@ -33,7 +23,7 @@ def csrf_protect():
 
 def generate_csrf_token():
     if '_csrf_token' not in session:
-        session['_csrf_token'] = random_string()
+        session['_csrf_token'] = repr(os.urandom(128))
     return session['_csrf_token']
 
 
@@ -41,7 +31,7 @@ app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
 def form():
-    return {'words': None}
+    return {'grid': None}
 
 
 def words():
@@ -50,10 +40,10 @@ def words():
     if not image:
         return form()
 
-    parsed = parse_image(image)
+    grid = Grid.from_image(image)
+
     return {
-        'words': get_best_words_for_letters(*parsed['letters'])[:50],
-        'grid': zip(*parsed['grid']),
+        'grid': grid,
         'inf': float('inf'),
     }
 

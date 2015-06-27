@@ -55,15 +55,16 @@
       }
 
       #grid td span {
+        text-transform: uppercase;
         color: #111111;
         opacity: .8;
       }
 
-      #grid .E {background-color: #F92A24}
-      #grid .e {background-color: #F2847B}
+      #grid .o.defended {background-color: #F92A24}
+      #grid .o {background-color: #F2847B}
       #grid .u {background-color: #E0DFDB}
-      #grid .m {background-color: #67BBF2}
-      #grid .M {background-color: #178EFE}
+      #grid .p {background-color: #67BBF2}
+      #grid .p.defended {background-color: #178EFE}
       
       #grid tr:nth-child(even) .u:nth-child(even),
       #grid tr:nth-child(odd) .u:nth-child(odd)
@@ -107,11 +108,16 @@
     <link rel="shortcut icon" href="https://colons.co/favicon.ico" type="image/vnd.microsoft.icon">
   </head>
   <body>
-    {% if words %}
+    {% if grid %}
       <table id="grid">
         <tr>
-          {% for state, letter in grid %}
-            <td class="{{ state }}"><span>{{ letter }}</span></td>
+          {% for tile in grid.tiles %}
+            <td class="
+              {{ tile.ownership }}
+              {% if tile.is_defended() %}defended{% endif %}
+            ">
+              <span>{{ tile.letter }}</span>
+            </td>
             {% if (not loop.index % 5) and (not loop.last) %}
               </tr><tr>
             {% endif %}
@@ -119,7 +125,7 @@
         </tr>
       </table>
       <table id="words">
-        {% for word, score in words %}
+        {% for word, score in grid.get_best_words() %}
           <tr>
             <td class="score">
               {% if score == inf %}
@@ -137,7 +143,7 @@
     <form action="" method="post" enctype="multipart/form-data">
       <input name=_csrf_token type=hidden value="{{ csrf_token() }}">
 
-      {% if words %}
+      {% if grid %}
         <h1>Upload another screenshot</h1>
       {% else %}
         <h1>Upload a screenshot of a Letterpress game</h1>
@@ -148,7 +154,7 @@
         <input type="submit" value="Upload"/>
       </p>
 
-      {% if not words %}
+      {% if not grid %}
         <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>
         <p>It doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble.</p>
 

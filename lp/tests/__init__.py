@@ -1,5 +1,8 @@
 import os
+from tempfile import mkdtemp
 from unittest import TestCase
+
+from PIL import Image
 
 from lp.game import Grid
 
@@ -22,4 +25,20 @@ class LPTest(TestCase):
             self.assertEqual(
                 [(t.letter, t.ownership) for t in grid.tiles],
                 zip(letters, ownership)
+            )
+
+    def test_examples_jpg(self):
+        # iOS transcodes pngs that it uploads to websites, including
+        # screenshots, so we need to make sure we can withstand that.
+
+        jpg_dir = mkdtemp()
+        for letters, ownership, png_path in self.pngs():
+            jpg_path = os.path.join(
+                jpg_dir, '{}_{}.jpg'.format(letters, ownership)
+            )
+            Image.open(png_path).save(jpg_path, format='JPEG', quality=80)
+            grid = Grid.from_image(open(jpg_path))
+            self.assertEqual(
+                zip(letters, ownership),
+                [(t.letter, t.ownership) for t in grid.tiles],
             )

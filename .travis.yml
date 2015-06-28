@@ -5,6 +5,9 @@ python:
   - "3.3"
   - "3.4"
 
+before_install:
+  - sudo apt-get install tesseract-ocr tesseract-ocr-eng
+
 install:
   - python setup.py -q install
 

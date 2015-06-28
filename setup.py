@@ -23,5 +23,9 @@ setup(
         'flask',
         'pillow',
     ],
+    tests_require=[
+        'nose',
+    ],
+    test_suite='nose.collector',
     include_package_data=True,
 )

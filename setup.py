@@ -21,6 +21,7 @@ setup(
     install_requires=[
         'ansicolors',
         'flask',
+        'opencv-python',
         'pillow',
     ],
     tests_require=[

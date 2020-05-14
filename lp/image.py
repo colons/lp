@@ -2,11 +2,15 @@ from __future__ import unicode_literals, print_function
 
 import os
 import shutil
-from string import uppercase
-import subprocess
+try:
+    from string import ascii_uppercase as uppercase
+except ImportError:
+    from string import uppercase
 import tempfile
 
+import cv2
 from PIL import Image, ImageOps
+from PIL.Image import NONE
 
 from lp.game import GRID_SIZE, NOBODY, OPPONENT, PLAYER
 
@@ -43,6 +47,23 @@ THEMES = (
 )
 
 
+def contours_for(image_path):
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    _, threshold = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
+    contours, _ = cv2.findContours(
+        threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE,
+    )
+
+    return contours
+
+
+LETTER_CONTOURS = {
+    letter: contours_for(os.path.join(
+        os.path.dirname(__file__), 'images', '{}.png'.format(letter)
+    )) for letter in uppercase
+}
+
+
 def colour_diff(a, b):
     return sum(
         abs(ac - bc)
@@ -52,6 +73,21 @@ def colour_diff(a, b):
 
 def closest_colour(colour, colours):
     return min(colours, key=lambda c: colour_diff(c, colour))
+
+
+def compare_contours(contours_a, contours_b):
+    return cv2.matchShapes(
+        contours_a[0], contours_b[0], cv2.CONTOURS_MATCH_I1, 0,
+    )
+
+
+def closest_letter(image_path):
+    contour = contours_for(image_path)
+
+    return min(
+        LETTER_CONTOURS.keys(),
+        key=lambda l: compare_contours(LETTER_CONTOURS[l], contour),
+    )
 
 
 def parse_image(image):
@@ -92,23 +128,24 @@ def parse_image(image):
         )
         crop = image.crop(coords)
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))
-        ImageOps.posterize(crop, 2).save(crop_path)
 
+        crop = ImageOps.posterize(crop, 2)
         ownership.append(
             colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
         )
 
-        subprocess.check_output(
-            ['tesseract', crop_path, os.path.join(dirpath, 'letter'), '-psm',
-             '10', '-c', 'tessedit_char_whitelist={}'.format(uppercase)],
-            stderr=subprocess.STDOUT,
-        )
+        crop = crop.convert('L')
+        crop = ImageOps.autocontrast(crop, 5)
+        if crop.getpixel((0, 0)) == 0:
+            crop = ImageOps.invert(crop)
+        elif crop.getpixel((0, 0)) == 255:
+            pass
+        else:
+            raise RuntimeError('this should be black or white')
+        crop = crop.convert('1', dither=NONE)
+        crop.save(crop_path)
 
-        with open(os.path.join(dirpath, 'letter.txt')) as lfile:
-            # tesseract doesn't parse | as I, so we assume if it's blank:
-            letter = lfile.read().strip() or 'I'
-
-        letters.append(letter)
+        letters.append(closest_letter(crop_path))
 
     shutil.rmtree(dirpath)
 

@@ -12,19 +12,33 @@ IMAGE_DIR = os.path.join(os.path.dirname(__file__), 'images')
 
 class LPTest(TestCase):
     def pngs(self):
-        for filename in os.listdir(IMAGE_DIR):
-            if filename.startswith('.') or not filename.endswith('.png'):
-                continue
+        for dirpath, _, filenames in os.walk(IMAGE_DIR):
+            dirname = os.path.basename(dirpath)
 
-            letters, ownership = os.path.splitext(filename)[0].split('_')
-            yield letters, ownership, os.path.join(IMAGE_DIR, filename)
+            for filename in filenames:
+                if filename.startswith('.') or not filename.endswith('.png'):
+                    continue
+
+                if '_' in filename:
+                    meta = filename
+                elif '_' in dirname:
+                    meta = dirname
+                else:
+                    raise RuntimeError(
+                        'not sure what to do with {}'.format(filename)
+                    )
+                letters, ownership = os.path.splitext(meta)[0].split('_')
+                yield letters, ownership, os.path.join(dirpath, filename)
 
     def assert_image_matches(self, letters, ownership, name):
-        grid = Grid.from_image(open(name))
+        grid = Grid.from_image(open(name, 'rb'))
         self.assertEqual(
             [(t.letter, t.ownership) for t in grid.tiles],
-            zip(letters, ownership)
+            list(zip(letters, ownership))
         )
+
+    def test_pngs(self):
+        self.assertEqual(len(list(self.pngs())), 10)
 
     def test_examples_png(self):
         for png in self.pngs():

@@ -3,12 +3,9 @@ lp
 
 A script and WSGI app for cheating at Letterpress. Can derive the state of a
 game and make recommendations based on screenshots uploaded to a web app.
-Letter recognition requires tesseract, which you can probably get from apt or
-homebrew or whatever your favourite package manager is.
 
 ::
 
-   $ brew install tesseract --HEAD || sudo apt-get install tesseract-ocr tesseract-ocr-eng || yum or uhh yaourt or something
    $ [sudo] pip install lp
    $ lp IMG_0001.PNG
    win - scruzes

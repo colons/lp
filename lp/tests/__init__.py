@@ -11,6 +11,8 @@ IMAGE_DIR = os.path.join(os.path.dirname(__file__), 'images')
 
 
 class LPTest(TestCase):
+    maxDiff = None
+
     def pngs(self):
         for dirpath, _, filenames in os.walk(IMAGE_DIR):
             dirname = os.path.basename(dirpath)

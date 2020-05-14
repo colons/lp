@@ -9,7 +9,8 @@ except ImportError:
 import tempfile
 
 import cv2
-from PIL import Image, ImageOps
+import numpy
+from PIL import Image, ImageOps, ImageFilter, ImageEnhance
 from PIL.Image import NONE
 
 from lp.game import GRID_SIZE, NOBODY, OPPONENT, PLAYER
@@ -47,18 +48,20 @@ THEMES = (
 )
 
 
-def contours_for(image_path):
+def invariant_for(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     _, threshold = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
-    contours, _ = cv2.findContours(
-        threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE,
-    )
+    moments = cv2.moments(threshold)
+    for k in list(moments.keys()):
+        if k.startswith('nu'):
+            v = moments[k]
+            moments[k] = -numpy.sign(v) * numpy.log10(numpy.abs(v))
+        else:
+            del moments[k]
 
-    return contours
 
-
-LETTER_CONTOURS = {
-    letter: contours_for(os.path.join(
+LETTER_INVARIANTS = {
+    letter: invariant_for(os.path.join(
         os.path.dirname(__file__), 'images', '{}.png'.format(letter)
     )) for letter in uppercase
 }
@@ -75,18 +78,16 @@ def closest_colour(colour, colours):
     return min(colours, key=lambda c: colour_diff(c, colour))
 
 
-def compare_contours(contours_a, contours_b):
-    return cv2.matchShapes(
-        contours_a[0], contours_b[0], cv2.CONTOURS_MATCH_I1, 0,
-    )
+def compare_invariants(a, b):
+    return cv2.matchShapes(a, b, cv2.CONTOURS_MATCH_I2, 0)
 
 
 def closest_letter(image_path):
-    contour = contours_for(image_path)
+    invariant = invariant_for(image_path)
 
     return min(
-        LETTER_CONTOURS.keys(),
-        key=lambda l: compare_contours(LETTER_CONTOURS[l], contour),
+        LETTER_INVARIANTS.keys(),
+        key=lambda l: compare_invariants(LETTER_INVARIANTS[l], invariant),
     )
 
 
@@ -135,13 +136,23 @@ def parse_image(image):
         )
 
         crop = crop.convert('L')
-        crop = ImageOps.autocontrast(crop, 5)
-        if crop.getpixel((0, 0)) == 0:
+        crop = ImageOps.autocontrast(crop, 0)
+
+        # remove weird jpg artifacts:
+        gaussian = ImageFilter.GaussianBlur(radius=base/100)
+        crop = crop.filter(gaussian)
+        contraster = ImageEnhance.Contrast(crop)
+        crop = contraster.enhance(10)
+
+        # invert, if necessary
+        bg = crop.getpixel((0, 0))
+        if bg == 0:
             crop = ImageOps.invert(crop)
-        elif crop.getpixel((0, 0)) == 255:
+        elif bg == 255:
             pass
         else:
-            raise RuntimeError('this should be black or white')
+            raise RuntimeError('{} should be black or white'.format(bg))
+
         crop = crop.convert('1', dither=NONE)
         crop.save(crop_path)
 

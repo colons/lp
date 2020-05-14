@@ -8,7 +8,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 
-SIZE = 1000
+SIZE = 100
 
 
 def make_image_for(letter):

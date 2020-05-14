@@ -38,7 +38,7 @@ class Grid(object):
         return '{}\n{}'.format(
             '{:>6} - {}'.format(self.player_score(), self.opponent_score()),
             '\n'.join(
-                ''.join(row) for row in self.rows()
+                ''.join((str(t) for t in row)) for row in self.rows()
             )
         )
 

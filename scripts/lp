@@ -45,8 +45,8 @@ def go_with_image():
     else:
         count = 10
 
-    image = open(sys.argv[1])
-    grid = Grid.from_image(image)
+    with open(sys.argv[1], 'rb') as image:
+        grid = Grid.from_image(image)
 
     print(grid)
     print('\n'.join((

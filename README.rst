@@ -4,6 +4,8 @@ lp
 A script and WSGI app for cheating at Letterpress. Can derive the state of a
 game and make recommendations based on screenshots uploaded to a web app.
 
+Requires Python 3.6 or later.
+
 ::
 
    $ [sudo] pip install lp

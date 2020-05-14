@@ -8,7 +8,7 @@ TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
 
 app = Flask(__name__)
 app.config.update({
-    'MAX_CONTENT_LENGTH': 1024 * 512,
+    'MAX_CONTENT_LENGTH': 1024 * 1024 * 4,
     'SECRET_KEY': os.environ.get('SECRET_KEY', os.urandom(128))
 })
 

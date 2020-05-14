@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, render_template, session, abort
 
 from lp.game import Grid
+from lp.image import LPImageException
 
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'page.html')
 
@@ -40,7 +41,10 @@ def words():
     if not image:
         return form()
 
-    grid = Grid.from_image(image)
+    try:
+        grid = Grid.from_image(image)
+    except LPImageException as e:
+        return {'grid': None, 'error': str(e)}
 
     return {
         'grid': grid,

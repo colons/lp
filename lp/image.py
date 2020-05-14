@@ -55,6 +55,11 @@ def invariant_for(image_path):
     _, threshold = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
     mask = threshold > 0
     cropped = threshold[numpy.ix_(mask.any(1), mask.any(0))]
+    if not all(cropped.shape):
+        raise LPImageException(
+            "We couldn't see a whole grid in this image; it might be "
+            "landscape or just very consistently coloured on the left side."
+        )
     resized = cv2.resize(
         cropped, (30, 30),
         interpolation=cv2.INTER_NEAREST,
@@ -172,7 +177,7 @@ def parse_image(image):
         elif bg == 255:
             pass
         else:
-            raise LPImageException('{} should be black or white'.format(bg))
+            raise LPImageException('Could not find clean tiles in the grid.')
 
         crop = crop.convert('1', dither=NONE)
         crop.save(crop_path)

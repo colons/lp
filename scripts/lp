@@ -20,8 +20,6 @@ you could run:
   LP_LANG=de lp [args]
 """
 
-from __future__ import print_function, unicode_literals
-
 import sys
 
 from lp.game import Grid

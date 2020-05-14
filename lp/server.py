@@ -66,7 +66,7 @@ def serve(address):
         host = '127.0.0.1'
 
     app.run(host=host, port=int(port), debug=True)
-    print address
+    print(address)
 
 
 application = app

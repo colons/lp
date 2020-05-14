@@ -14,6 +14,10 @@ from PIL.Image import NONE
 from lp.game import GRID_SIZE, NOBODY, OPPONENT, PLAYER
 
 
+class LPImageException(Exception):
+    pass
+
+
 # as RGB tuples of opponent defended, opponent, unclaimed, ours, defended ours.
 # we actually use the background colour for unclaimed to make shortlisting our
 # themes easier, as there are actually two unclaimed colours in each theme
@@ -99,6 +103,15 @@ def closest_letter(image_path):
     )
 
 
+def distance_to_different_colour_from_bottom(image):
+    top_left = image.getpixel((0, 0))
+    for i in range(1, image.height):
+        px = image.getpixel((0, image.height-i))
+        if colour_diff(top_left, px) > 10:
+            return i-1
+    raise LPImageException('Could not find the bottom of the grid')
+
+
 def parse_image(image):
     letters = []
     ownership = []
@@ -125,8 +138,9 @@ def parse_image(image):
     }
 
     width, height = image.size
-    base = width/GRID_SIZE
-    top_padding = height-width
+    base = width / GRID_SIZE
+    bottom_padding = distance_to_different_colour_from_bottom(image)
+    top_padding = (height - width) - bottom_padding
 
     for x, y in ((x, y) for y in range(GRID_SIZE) for x in range(GRID_SIZE)):
         coords = (
@@ -158,7 +172,7 @@ def parse_image(image):
         elif bg == 255:
             pass
         else:
-            raise RuntimeError('{} should be black or white'.format(bg))
+            raise LPImageException('{} should be black or white'.format(bg))
 
         crop = crop.convert('1', dither=NONE)
         crop.save(crop_path)

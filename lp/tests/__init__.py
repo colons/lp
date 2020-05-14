@@ -41,7 +41,7 @@ class LPTest(TestCase):
         )
 
     def test_pngs(self):
-        self.assertEqual(len(list(self.pngs())), 10)
+        self.assertEqual(len(list(self.pngs())), 18)
 
     def test_examples_png(self):
         for png in self.pngs():
@@ -53,5 +53,8 @@ class LPTest(TestCase):
 
         for letters, ownership, png_path in self.pngs():
             jpg_path = mktemp('.jpg')
-            Image.open(png_path).save(jpg_path, format='JPEG', quality=80)
+            with open(png_path, 'rb') as f:
+                image = Image.open(f)
+                image = image.convert('RGB')
+                image.save(jpg_path, format='JPEG', quality=80)
             self.assert_image_matches(letters, ownership, jpg_path)

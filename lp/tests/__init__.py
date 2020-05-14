@@ -33,7 +33,8 @@ class LPTest(TestCase):
                 yield letters, ownership, os.path.join(dirpath, filename)
 
     def assert_image_matches(self, letters, ownership, name):
-        grid = Grid.from_image(open(name, 'rb'))
+        with open(name, 'rb') as f:
+            grid = Grid.from_image(f)
         self.assertEqual(
             [(t.letter, t.ownership) for t in grid.tiles],
             list(zip(letters, ownership))

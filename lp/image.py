@@ -49,13 +49,16 @@ THEMES = (
 def invariant_for(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     _, threshold = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
-    moments = cv2.moments(threshold)
-    for k in list(moments.keys()):
-        if k.startswith('nu'):
-            v = moments[k]
-            moments[k] = -numpy.sign(v) * numpy.log10(numpy.abs(v))
-        else:
-            del moments[k]
+    mask = threshold > 0
+    cropped = threshold[numpy.ix_(mask.any(1), mask.any(0))]
+    resized = cv2.resize(
+        cropped, (30, 30),
+        interpolation=cv2.INTER_NEAREST,
+    )
+    # print('\n'.join((
+    #     ''.join(( '0' if px else '-' for px in r))
+    # ) for r in resized))
+    return resized
 
 
 LETTER_INVARIANTS = {
@@ -77,7 +80,14 @@ def closest_colour(colour, colours):
 
 
 def compare_invariants(a, b):
-    return cv2.matchShapes(a, b, cv2.CONTOURS_MATCH_I2, 0)
+    diff = 0
+
+    for row_a, row_b in zip(a, b):
+        for px_a, px_b in zip(row_a, row_b):
+            if px_a != px_b:
+                diff += 1
+
+    return diff
 
 
 def closest_letter(image_path):
@@ -128,7 +138,6 @@ def parse_image(image):
         crop = image.crop(coords)
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))
 
-        crop = ImageOps.posterize(crop, 2)
         ownership.append(
             colours[closest_colour(crop.getpixel((0, 0)), colours.keys())]
         )

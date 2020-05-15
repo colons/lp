@@ -31,20 +31,20 @@ def generate_csrf_token():
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 
-def form():
-    return {'grid': None}
-
-
 def words():
     image = request.files.get('image')
+    priority = request.form.get('priority')
+
+    if priority not in Grid.PRIORITIES.keys():
+        priority = Grid.NET_SCORE_PRIORITY
 
     if not image:
-        return form()
+        return {}
 
     try:
-        grid = Grid.from_image(image)
+        grid = Grid.from_image(image, priority=priority)
     except LPImageException as e:
-        return {'grid': None, 'error': str(e)}
+        return {'error': str(e)}
 
     return {
         'grid': grid,
@@ -54,10 +54,13 @@ def words():
 
 @app.route('/', methods=['POST', 'GET'])
 def result():
-    if request.method == 'GET':
-        context = form()
-    else:
-        context = words()
+    context = {
+        'grid': None,
+        'priorities': Grid.PRIORITIES,
+    }
+
+    if request.method == 'POST':
+        context.update(words())
 
     return render_template('page.html', **context)
 

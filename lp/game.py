@@ -19,12 +19,31 @@ NOBODY = 'u'
 GRID_SIZE = 5
 
 
+class NoSuchPriorityError(ValueError):
+    pass
+
+
 class Grid(object):
     """
     A representation of the state of a grid in a given game.
     """
 
-    def __init__(self, letters, ownership):
+    NET_SCORE_PRIORITY = 'ns'
+    AVOID_SPREADING_PRIORITY = 'plg'
+
+    PRIORITIES = {
+        NET_SCORE_PRIORITY: (
+            "Focus exclusively on increasing your score relative to your "
+            "opponents."
+        ),
+        AVOID_SPREADING_PRIORITY: (
+            "Try only to take tiles from your opponent. Useful in late-game "
+            "situations when you're trying not to give away an easy word "
+            "that'll let your opponent win."
+        ),
+    }
+
+    def __init__(self, letters, ownership, priority=NET_SCORE_PRIORITY):
         letters = letters.lower()
 
         self.tiles = [
@@ -35,6 +54,8 @@ class Grid(object):
         # and, just to make looking up words quicker:
         self.letters = letters
 
+        self.priority = priority
+
     def __str__(self):
         return '{}\n{}'.format(
             '{:>6} - {}'.format(self.player_score(), self.opponent_score()),
@@ -44,9 +65,9 @@ class Grid(object):
         )
 
     @classmethod
-    def from_image(cls, image):
+    def from_image(cls, image, **kw):
         from lp.image import parse_image
-        return cls(*parse_image(image))
+        return cls(*parse_image(image), **kw)
 
     def _score_for(self, player):
         return len([t for t in self.tiles if t.ownership == player])
@@ -94,7 +115,7 @@ class Grid(object):
                 blocked.add(word[:i])
 
     def get_value_of_word(self, word):
-        target_letters = [
+        undefended_opponent_letters = [
             t.letter for t in self.tiles
             if t.ownership == OPPONENT and not t.is_defended()
         ]
@@ -106,11 +127,23 @@ class Grid(object):
         score = 0
 
         for letter in word:
-            if letter in target_letters:
-                score += 2
-                target_letters.remove(letter)
+            if letter in undefended_opponent_letters:
+                if self.priority == Grid.NET_SCORE_PRIORITY:
+                    score += 2
+                elif self.priority == Grid.AVOID_SPREADING_PRIORITY:
+                    score += 1
+                else:
+                    raise NoSuchPriorityError()
+
+                undefended_opponent_letters.remove(letter)
             elif letter in unclaimed_letters:
-                score += 1
+                if self.priority == Grid.NET_SCORE_PRIORITY:
+                    score += 1
+                elif self.priority == Grid.AVOID_SPREADING_PRIORITY:
+                    score -= 1
+                else:
+                    raise NoSuchPriorityError()
+
                 unclaimed_letters.remove(letter)
 
         if len(unclaimed_letters) == 0 and score > (

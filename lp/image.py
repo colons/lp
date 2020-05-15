@@ -109,9 +109,13 @@ def closest_letter(image_path):
 
 
 def distance_to_different_colour_from_bottom(image):
+    # we don't use the leftmost pixel, because tiles can wiggle out of the way
+    # of that; instead, we use the middle of the leftmost tile:
+    lc = (image.width / GRID_SIZE) / 2
+
     top_left = image.getpixel((0, 0))
     for i in range(1, image.height):
-        px = image.getpixel((0, image.height-i))
+        px = image.getpixel((lc, image.height-i))
         if colour_diff(top_left, px) > 10:
             return i-1
     raise LPImageException('Could not find the bottom of the grid')
@@ -147,6 +151,8 @@ def parse_image(image):
     bottom_padding = distance_to_different_colour_from_bottom(image)
     top_padding = (height - width) - bottom_padding
 
+    crops = []
+
     for x, y in ((x, y) for y in range(GRID_SIZE) for x in range(GRID_SIZE)):
         coords = (
             (x * base) + base/6,
@@ -169,6 +175,7 @@ def parse_image(image):
         crop = crop.filter(gaussian)
         contraster = ImageEnhance.Contrast(crop)
         crop = contraster.enhance(10)
+        crops.append(crop)
 
         # invert, if necessary
         bg = crop.getpixel((0, 0))
@@ -177,6 +184,8 @@ def parse_image(image):
         elif bg == 255:
             pass
         else:
+            for c in crops:
+                c.show()
             raise LPImageException('Could not find clean tiles in the grid.')
 
         crop = crop.convert('1', dither=NONE)

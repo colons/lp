@@ -74,7 +74,7 @@
       #grid tr:nth-child(odd) .u:nth-child(odd)
       {background-color: #E2E1DD}
 
-      #words, form {
+      #words, form, body > p {
         margin: .2em auto 1em;
         padding: 0 .5em;
         font-size: 1.2rem;
@@ -86,13 +86,12 @@
       #words .score {text-align: right}
       #words .word {text-transform: uppercase}
 
-      form {max-width: 30rem}
-      input {font-size: .8em}
-
-      form p#inputs {
-        margin: 0 0 1em;
-        position: relative;
+      form {
+        max-width: 30rem;
+        margin: 0 auto 2em;
       }
+
+      input {font-size: .8em}
 
       input[type=file] {max-width: 13.5em}
 
@@ -131,14 +130,23 @@
         <p class="error">Please ensure your screenshot is a clean screenshot of Letterpress running on an iPhone or iPod Touch, and you've not already selected any letters.</p>
       {% endif %}
 
-
-      {% if not grid %}
-        <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>
-        <p>It doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble.</p>
-
-        <p>If you just want to have a look at an example, you could save and upload <a href="https://colons.co/lp.png">this image</a>.</p>
-      {% endif %}
+      {% for value, description in priorities.items() %}
+        <p>
+          <input
+            type="radio" name="priority" value="{{ value }}" id="pr_{{ value }}"
+            {% if loop.index0 == 0 %}checked{% endif %}
+          >
+          <label for="pr_{{ value }}">{{ description }}</label>
+        </p>
+      {% endfor %}
     </form>
+
+    {% if not grid %}
+      <p>You'll get back a list of the top fifty words you could play and the score differential they'd get you.</p>
+      <p>It doesn't matter what theme you're using, but no letters should be selected and it might break things if some letters are still doing their initial wobble.</p>
+
+      <p>If you just want to have a look at an example, you could save and upload <a href="https://colons.co/lp.png">this image</a>.</p>
+    {% endif %}
 
     {% if grid %}
       <table id="grid">

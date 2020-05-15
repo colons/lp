@@ -33,15 +33,19 @@ class LPTest(TestCase):
                 yield letters, ownership, os.path.join(dirpath, filename)
 
     def assert_image_matches(self, letters, ownership, name):
-        with open(name, 'rb') as f:
-            grid = Grid.from_image(f)
-        self.assertEqual(
-            [(t.letter, t.ownership) for t in grid.tiles],
-            list(zip(letters, ownership))
-        )
+        try:
+            with open(name, 'rb') as f:
+                grid = Grid.from_image(f)
+            self.assertEqual(
+                [(t.letter, t.ownership) for t in grid.tiles],
+                list(zip(letters, ownership))
+            )
+        except Exception:
+            print('failed on {}'.format(name))
+            raise
 
     def test_pngs(self):
-        self.assertEqual(len(list(self.pngs())), 18)
+        self.assertEqual(len(list(self.pngs())), 20)
 
     def test_examples_png(self):
         for png in self.pngs():

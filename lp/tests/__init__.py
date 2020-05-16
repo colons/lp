@@ -101,3 +101,7 @@ class LPTest(TestCase):
             'picked from top row.png', LPImageException,
             GRID_NOT_FOUND_ERROR,
         )
+        self.assert_image_raises_error(
+            'cropped bottom.png', LPImageException,
+            GRID_NOT_FOUND_ERROR,
+        )

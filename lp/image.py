@@ -50,6 +50,16 @@ THEMES = (
 )
 
 
+# the fractions of the edges of tiles we'll cut off to get rid of wiggle
+# artifacts
+TILE_MARGIN = 6
+# the difference in colour that, if seen, makes us think a row isn't homogenous
+HOMOGENOUS_ERROR_MARGIN = 5
+# the difference we expect to see between game background and unclaimed tile
+# backgrounds
+COLOUR_DIFF_THRESHOLD = 10
+
+
 def invariant_for(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     _, threshold = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY_INV)
@@ -108,17 +118,81 @@ def closest_letter(image_path):
     )
 
 
-def distance_to_different_colour_from_bottom(image):
-    # we don't use the leftmost pixel, because tiles can wiggle out of the way
-    # of that; instead, we use the middle of the leftmost tile:
-    lc = (image.width / GRID_SIZE) / 2
+def grid_centres(width):
+    for i in range(GRID_SIZE):
+        yield (
+            (i * (width // GRID_SIZE)) +
+            ((width // GRID_SIZE) // 2)
+        )
 
-    top_left = image.getpixel((0, 0))
-    for i in range(1, image.height):
-        px = image.getpixel((lc, image.height-i))
-        if colour_diff(top_left, px) > 10:
-            return i-1
-    raise LPImageException('Could not find the bottom of the grid')
+
+def top_of_grid(image):
+    """
+    find a range of points in the y axis where every point that aligns with the
+    centre of a square in a row is within colour_diff() HOMOGENOUS_ERROR_MARGIN
+    of each other, and every point search_range below those points has at least
+    least colour_diff() COLOUR_DIFF_THRESHOLD. return the y coordinate of the
+    row with the different colours, or the point image.width pixels from the
+    bottom of the image
+
+    """
+
+    # search_range is the vertical distance of pixels to consider checking
+    # against each other. the only real considerations here are 'how far up and
+    # down can the horizontal centre of a tile be pushed by tile wiggle', and
+    # 'how bad are the jpeg artifacts', both of which shouldn't be changing too
+    # much, so:
+    wiggle_range = (image.width // GRID_SIZE) // 10
+    search_range = max((wiggle_range, 4))
+
+    # begin the search at either 1.5x the image width from the bottom or one
+    # grid tile from the top, whichever is the lower point; avoids false
+    # positives from status bars or edge artifacts
+    start_at = min((
+        (image.height - int(1.5 * image.width)),
+        (image.width // GRID_SIZE)
+    ))
+
+    stop_at = image.height - image.width - search_range + wiggle_range
+
+    if not (stop_at > start_at):
+        raise LPImageException(
+            "This image doesn't have a narrow enough aspect ratio to be a "
+            "Letterpress screenshot as we understand them."
+        )
+
+    for ypx in range(start_at, stop_at):
+        top_row_colours = set()
+        for xpx in grid_centres(image.width):
+            top_row_colours.add(image.getpixel((xpx, ypx)))
+
+        # abandon if the row isn't homogenous
+        if len(top_row_colours) > 1:
+            max_diff = 0
+            for colour_a, colour_b in (
+                (a, b) for a in top_row_colours for b in top_row_colours
+            ):
+                diff = colour_diff(colour_a, colour_b)
+                if diff > max_diff:
+                    max_diff = diff
+
+            if max_diff > HOMOGENOUS_ERROR_MARGIN:
+                continue
+
+        # okay, we have a top row that's homogenous, so now we check below:
+        bottom_row_colours = set()
+        for xpx in grid_centres(image.width):
+            bottom_row_colours.add(image.getpixel((xpx, ypx + search_range)))
+
+        if all((
+            colour_diff(a, b) > COLOUR_DIFF_THRESHOLD
+            for a in top_row_colours for b in bottom_row_colours
+        )):
+            return ypx + search_range
+
+    raise LPImageException(
+        "We couldn't locate the top of the grid in this image."
+    )
 
 
 def parse_image(image):
@@ -148,17 +222,16 @@ def parse_image(image):
 
     width, height = image.size
     base = width / GRID_SIZE
-    bottom_padding = distance_to_different_colour_from_bottom(image)
-    top_padding = (height - width) - bottom_padding
+    top_padding = top_of_grid(image)
 
     crops = []
 
     for x, y in ((x, y) for y in range(GRID_SIZE) for x in range(GRID_SIZE)):
         coords = (
-            (x * base) + base/6,
-            (y * base) + top_padding + base/6,
-            ((x + 1) * base) - base/6,
-            ((y + 1) * base) + top_padding - base/6,
+            (x * base) + base/TILE_MARGIN,
+            (y * base) + top_padding + base/TILE_MARGIN,
+            ((x + 1) * base) - base/TILE_MARGIN,
+            ((y + 1) * base) + top_padding - base/TILE_MARGIN,
         )
         crop = image.crop(coords)
         crop_path = os.path.join(dirpath, '{}_{}.png'.format(x, y))

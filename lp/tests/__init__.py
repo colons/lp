@@ -30,6 +30,7 @@ class LPTest(TestCase):
                         'not sure what to do with {}'.format(filename)
                     )
                 letters, ownership = os.path.splitext(meta)[0].split('_')
+                print(filename)
                 yield letters, ownership, os.path.join(dirpath, filename)
 
     def assert_image_matches(self, letters, ownership, name):
@@ -45,7 +46,7 @@ class LPTest(TestCase):
             raise
 
     def test_pngs(self):
-        self.assertEqual(len(list(self.pngs())), 20)
+        self.assertEqual(len(list(self.pngs())), 22)
 
     def test_examples_png(self):
         for png in self.pngs():

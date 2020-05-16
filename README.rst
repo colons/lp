@@ -1,8 +1,9 @@
 lp
 ==
 
-A script and WSGI app for cheating at Letterpress. Can derive the state of a
-game and make recommendations based on screenshots uploaded to a web app.
+A command-line script and web app for cheating at Letterpress. Takes a
+screenshot of a game in progress and makes suggestions based on what words can
+be played and what tiles can be taken.
 
 Requires Python 3.6 or later.
 

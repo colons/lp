@@ -18,6 +18,12 @@ class LPImageException(Exception):
     pass
 
 
+TOO_LITTLE_CONFIDENCE_ERROR = (
+    "We couldn't confidently read at least one of the letters in the grid; "
+    "perhaps it was wiggling too much?"
+)
+
+
 # as RGB tuples of opponent defended, opponent, unclaimed, ours, defended ours.
 # we actually use the background colour for unclaimed to make shortlisting our
 # themes easier, as there are actually two unclaimed colours in each theme
@@ -59,6 +65,14 @@ HOMOGENOUS_ERROR_MARGIN = 5
 # backgrounds
 COLOUR_DIFF_THRESHOLD = 10
 
+# the height and width of the pixel matrix we use to compare letters with one
+# another
+COMPARISON_MATRIX_SIZE = 30
+# how good a match has to be for us not to check it any further
+COMPARISON_MATCH_THRESHOLD = 0.3
+# how much error a match can have before we throw it out
+COMPARISON_RELATIVE_CONFIDENCE_THRESHOLD = 1.5
+
 
 def invariant_for(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -71,7 +85,7 @@ def invariant_for(image_path):
             "landscape or just very consistently coloured on the left side."
         )
     resized = cv2.resize(
-        cropped, (30, 30),
+        cropped, (COMPARISON_MATRIX_SIZE, COMPARISON_MATRIX_SIZE),
         interpolation=cv2.INTER_NEAREST,
     )
     # print('\n'.join((
@@ -106,16 +120,43 @@ def compare_invariants(a, b):
             if px_a != px_b:
                 diff += 1
 
-    return diff
+    return diff / (COMPARISON_MATRIX_SIZE ** 2)
 
 
 def closest_letter(image_path):
     invariant = invariant_for(image_path)
+    differences = {  # letters and how similar our letter is to each of them
+        letter: compare_invariants(LETTER_INVARIANTS[letter], invariant)
+        for letter in LETTER_INVARIANTS.keys()
+    }
 
-    return min(
-        LETTER_INVARIANTS.keys(),
-        key=lambda l: compare_invariants(LETTER_INVARIANTS[l], invariant),
+    best_letter = min(
+        differences.keys(),
+        key=lambda l: differences[l],
     )
+
+    if differences[best_letter] > COMPARISON_MATCH_THRESHOLD:
+        # we're not 100% certain, let's make sure we're at least pretty
+        # confident (worth noting that a 100% match is very very unlikely, this
+        # is mostly just here to catch divide-by-zero errors)
+
+        next_best_letter = min(
+            (k for k in differences.keys() if k != best_letter),
+            key=lambda l: differences[l],
+        )
+
+        # the relative difference in confidence between our best pick and the
+        # next best pick. should be higher than COMPARISON_MATCH_THRESHOLD,
+        # otherwise we aren't sure enough to present it as truth
+
+        relative_confidence = (
+            differences[next_best_letter] / differences[best_letter]
+        )
+
+        if relative_confidence < COMPARISON_RELATIVE_CONFIDENCE_THRESHOLD:
+            raise LPImageException(TOO_LITTLE_CONFIDENCE_ERROR)
+
+    return best_letter
 
 
 def grid_centres(width):

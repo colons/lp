@@ -5,6 +5,7 @@ from unittest import TestCase
 from PIL import Image
 
 from lp.game import Grid
+from lp.image import LPImageException, TOO_LITTLE_CONFIDENCE_ERROR
 
 
 IMAGE_DIR = os.path.join(os.path.dirname(__file__), 'images')
@@ -26,9 +27,8 @@ class LPTest(TestCase):
                 elif '_' in dirname:
                     meta = dirname
                 else:
-                    raise RuntimeError(
-                        'not sure what to do with {}'.format(filename)
-                    )
+                    continue
+
                 letters, ownership = os.path.splitext(meta)[0].split('_')
                 print(filename)
                 yield letters, ownership, os.path.join(dirpath, filename)
@@ -46,7 +46,7 @@ class LPTest(TestCase):
             raise
 
     def test_pngs(self):
-        self.assertEqual(len(list(self.pngs())), 22)
+        self.assertEqual(len(list(self.pngs())), 21)
 
     def test_examples_png(self):
         for png in self.pngs():
@@ -63,3 +63,21 @@ class LPTest(TestCase):
                 image = image.convert('RGB')
                 image.save(jpg_path, format='JPEG', quality=80)
             self.assert_image_matches(letters, ownership, jpg_path)
+
+    def assert_image_raises_error(self, image, error, message):
+        with self.assertRaises(error) as cm:
+            self.assert_image_matches('', '', os.path.join(
+                os.path.dirname(__file__), 'images', 'errors', image,
+            ))
+
+        self.assertEqual(str(cm.exception), message)
+
+    def test_errors(self):
+        self.assert_image_raises_error(
+            'contrast wiggle.png', LPImageException,
+            TOO_LITTLE_CONFIDENCE_ERROR,
+        )
+        self.assert_image_raises_error(
+            'pop wiggle.png', LPImageException,
+            TOO_LITTLE_CONFIDENCE_ERROR,
+        )

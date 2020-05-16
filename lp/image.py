@@ -22,6 +22,18 @@ TOO_LITTLE_CONFIDENCE_ERROR = (
     "We couldn't confidently read at least one of the letters in the grid; "
     "perhaps it was wiggling too much?"
 )
+NOT_NARROW_ENOUGH_ERROR = (
+    "This image doesn't have a narrow enough aspect ratio to be a Letterpress "
+    "screenshot as we understand them."
+)
+_DONT_PICK_TILES = "Please ensure you've not already picked any letters."
+GRID_NOT_FOUND_ERROR = (
+    "We couldn't find a game grid in this image. {}"
+).format(_DONT_PICK_TILES)
+UNCLEAN_TILE_ERROR = (
+    "At least one of the tiles in the grid doesn't appear to have a letter in "
+    "it. {}"
+).format(_DONT_PICK_TILES)
 
 
 # as RGB tuples of opponent defended, opponent, unclaimed, ours, defended ours.
@@ -80,10 +92,7 @@ def invariant_for(image_path):
     mask = threshold > 0
     cropped = threshold[numpy.ix_(mask.any(1), mask.any(0))]
     if not all(cropped.shape):
-        raise LPImageException(
-            "We couldn't see a whole grid in this image; it might be "
-            "landscape or just very consistently coloured on the left side."
-        )
+        raise RuntimeError('We managed to generate a grid with missing pixels')
     resized = cv2.resize(
         cropped, (COMPARISON_MATRIX_SIZE, COMPARISON_MATRIX_SIZE),
         interpolation=cv2.INTER_NEAREST,
@@ -186,21 +195,18 @@ def top_of_grid(image):
     wiggle_range = (image.width // GRID_SIZE) // 10
     search_range = max((wiggle_range, 4))
 
-    # begin the search at either 1.5x the image width from the bottom or one
-    # grid tile from the top, whichever is the lower point; avoids false
-    # positives from status bars or edge artifacts
-    start_at = min((
+    # begin the search at either 1.5x the image width from the bottom or about
+    # a quarter of a tile from the top, whichever is the lower point; avoids
+    # false positives from status bars and edge artifacts
+    start_at = max((
         (image.height - int(1.5 * image.width)),
-        (image.width // GRID_SIZE)
+        ((image.width // GRID_SIZE) // 4)
     ))
 
     stop_at = image.height - image.width - search_range + wiggle_range
 
     if not (stop_at > start_at):
-        raise LPImageException(
-            "This image doesn't have a narrow enough aspect ratio to be a "
-            "Letterpress screenshot as we understand them."
-        )
+        raise LPImageException(NOT_NARROW_ENOUGH_ERROR)
 
     for ypx in range(start_at, stop_at):
         top_row_colours = set()
@@ -231,9 +237,7 @@ def top_of_grid(image):
         )):
             return ypx + search_range
 
-    raise LPImageException(
-        "We couldn't locate the top of the grid in this image."
-    )
+    raise LPImageException(GRID_NOT_FOUND_ERROR)
 
 
 def parse_image(image):
@@ -298,9 +302,7 @@ def parse_image(image):
         elif bg == 255:
             pass
         else:
-            for c in crops:
-                c.show()
-            raise LPImageException('Could not find clean tiles in the grid.')
+            raise LPImageException(UNCLEAN_TILE_ERROR)
 
         crop = crop.convert('1', dither=NONE)
         crop.save(crop_path)

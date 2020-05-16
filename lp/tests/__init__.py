@@ -5,7 +5,11 @@ from unittest import TestCase
 from PIL import Image
 
 from lp.game import Grid
-from lp.image import LPImageException, TOO_LITTLE_CONFIDENCE_ERROR
+from lp.image import (
+    LPImageException,
+    TOO_LITTLE_CONFIDENCE_ERROR, NOT_NARROW_ENOUGH_ERROR, GRID_NOT_FOUND_ERROR,
+    UNCLEAN_TILE_ERROR,
+)
 
 
 IMAGE_DIR = os.path.join(os.path.dirname(__file__), 'images')
@@ -48,11 +52,11 @@ class LPTest(TestCase):
     def test_pngs(self):
         self.assertEqual(len(list(self.pngs())), 21)
 
-    def test_examples_png(self):
+    def est_examples_png(self):
         for png in self.pngs():
             self.assert_image_matches(*png)
 
-    def test_examples_jpg(self):
+    def est_examples_jpg(self):
         # iOS transcodes pngs that it uploads to websites, including
         # screenshots, so we need to make sure we can withstand that.
 
@@ -80,4 +84,20 @@ class LPTest(TestCase):
         self.assert_image_raises_error(
             'pop wiggle.png', LPImageException,
             TOO_LITTLE_CONFIDENCE_ERROR,
+        )
+        self.assert_image_raises_error(
+            'wide.png', LPImageException,
+            NOT_NARROW_ENOUGH_ERROR,
+        )
+        self.assert_image_raises_error(
+            'not a game.png', LPImageException,
+            GRID_NOT_FOUND_ERROR,
+        )
+        self.assert_image_raises_error(
+            'picked.png', LPImageException,
+            UNCLEAN_TILE_ERROR,
+        )
+        self.assert_image_raises_error(
+            'picked from top row.png', LPImageException,
+            GRID_NOT_FOUND_ERROR,
         )
